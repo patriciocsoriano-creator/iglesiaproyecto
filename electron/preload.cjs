@@ -33,6 +33,17 @@ contextBridge.exposeInMainWorld('iglesia', {
 
   },
 
+    // ---------------------------------------------------
+  // RESPALDOS Y TRANSFERENCIA DE DATOS
+  // ---------------------------------------------------
+
+  respaldo: {
+
+    exportar: () =>
+      ipcRenderer.invoke('respaldo:exportar')
+
+  },
+
   // ---------------------------------------------------
   // REGISTRO DE BAUTIZOS
   // ---------------------------------------------------

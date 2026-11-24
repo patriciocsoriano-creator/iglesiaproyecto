@@ -2210,6 +2210,84 @@ function actualizarMatrimonio(datos) {
   };
 }
 
+
+// =====================================================
+// EXPORTAR RESPALDO COMPLETO Y CONSISTENTE
+// =====================================================
+
+function exportarRespaldoCompleto() {
+
+  if (!db) {
+    throw new Error('La base de datos no está inicializada.');
+  }
+
+  // Las seis tablas se leen dentro de una misma transacción.
+  // Así evitamos obtener registros de momentos diferentes.
+
+  const obtenerDatos = db.transaction(() => {
+
+    return {
+
+      usuarios: db.prepare(`
+        SELECT * FROM usuarios ORDER BY id
+      `).all(),
+
+      configuracion_parroquial: db.prepare(`
+        SELECT * FROM configuracion_parroquial ORDER BY id
+      `).all(),
+
+      bautizos: db.prepare(`
+        SELECT * FROM bautizos ORDER BY id
+      `).all(),
+
+      comuniones: db.prepare(`
+        SELECT * FROM comuniones ORDER BY id
+      `).all(),
+
+      confirmaciones: db.prepare(`
+        SELECT * FROM confirmaciones ORDER BY id
+      `).all(),
+
+      matrimonios: db.prepare(`
+        SELECT * FROM matrimonios ORDER BY id
+      `).all()
+
+    };
+
+  });
+
+  const tablas = obtenerDatos();
+
+  const respaldo = {
+
+    formato: 'IGLESIA_RESPALDO',
+
+    version: 1,
+
+    generadoEn: new Date().toISOString(),
+
+    tablas
+
+  };
+
+  // Huella de integridad SHA-256.
+
+  const checksum = crypto
+    .createHash('sha256')
+    .update(JSON.stringify(respaldo), 'utf8')
+    .digest('hex');
+
+  return {
+
+    ...respaldo,
+
+    checksum
+
+  };
+
+}
+
+
 // =====================================================
 // EXPORTAR FUNCIONES
 // =====================================================
@@ -2240,5 +2318,8 @@ module.exports = {
   guardarMatrimonio,
   listarMatrimonios,
   obtenerMatrimonio,
-  actualizarMatrimonio
+  actualizarMatrimonio,
+
+  // Respaldo completo
+  exportarRespaldoCompleto
 };

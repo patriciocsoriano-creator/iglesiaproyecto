@@ -38,10 +38,165 @@ const {
   guardarMatrimonio,
   listarMatrimonios,
   obtenerMatrimonio,
-  actualizarMatrimonio
+  actualizarMatrimonio,
+
+  exportarRespaldoCompleto
 
 } = require('./database/database.cjs');
 
+
+// =====================================================
+// EXPORTAR RESPALDO COMPLETO PARA ANDROID E IOS
+// =====================================================
+
+ipcMain.handle(
+  'respaldo:exportar',
+  async (event) => {
+
+    try {
+
+      // Generar respaldo en memoria.
+      const respaldo = exportarRespaldoCompleto();
+
+      const contenido = JSON.stringify(
+        respaldo,
+        null,
+        2
+      );
+
+      const fecha = new Date()
+        .toISOString()
+        .replace(/[:.]/g, '-');
+
+      const nombreArchivo =
+        `Respaldo_Iglesia_${fecha}.json`;
+
+      // Mostrar diálogo para elegir dónde guardar.
+      const resultado = await dialog.showSaveDialog(
+        BrowserWindow.fromWebContents(event.sender),
+        {
+          title: 'Exportar respaldo de la parroquia',
+          defaultPath: nombreArchivo,
+          buttonLabel: 'Guardar respaldo',
+          filters: [
+            {
+              name: 'Respaldo de Iglesia',
+              extensions: ['json']
+            }
+          ]
+        }
+      );
+
+      if (
+        resultado.canceled ||
+        !resultado.filePath
+      ) {
+
+        return {
+          success: false,
+          canceled: true,
+          message: 'Exportación cancelada.'
+        };
+
+      }
+
+      let destino = resultado.filePath;
+
+      if (!destino.toLowerCase().endsWith('.json')) {
+        destino += '.json';
+      }
+
+      // Guardar primero en un archivo temporal.
+      // Luego renombrarlo para evitar respaldos incompletos.
+
+      const temporal =
+        `${destino}.${crypto.randomUUID()}.tmp`;
+
+      try {
+
+        await fs.writeFile(
+          temporal,
+          contenido,
+          {
+            encoding: 'utf8',
+            flag: 'wx'
+          }
+        );
+
+        await fs.rename(temporal, destino);
+
+      } catch (error) {
+
+        try {
+          await fs.unlink(temporal);
+        } catch (_) {}
+
+        throw error;
+
+      }
+
+      const tablas = respaldo.tablas;
+
+      const cantidades = {
+
+        usuarios: tablas.usuarios.length,
+
+        configuracion:
+          tablas.configuracion_parroquial.length,
+
+        bautizos: tablas.bautizos.length,
+
+        comuniones: tablas.comuniones.length,
+
+        confirmaciones: tablas.confirmaciones.length,
+
+        matrimonios: tablas.matrimonios.length
+
+      };
+
+      console.log(
+        '[RESPALDO] Exportación completa:',
+        cantidades
+      );
+
+      return {
+
+        success: true,
+
+        canceled: false,
+
+        path: destino,
+
+        cantidades,
+
+        message:
+          'Respaldo parroquial exportado correctamente.'
+
+      };
+
+    } catch (error) {
+
+      console.error(
+        '[RESPALDO] Error al exportar:',
+        error
+      );
+
+      return {
+
+        success: false,
+
+        canceled: false,
+
+        message:
+          error.message ||
+          'No se pudo exportar el respaldo.'
+
+      };
+
+    }
+
+  }
+);
 
 // =====================================================
 // CONFIGURACIÓN DE DOCUMENTOS TEMPORALES
