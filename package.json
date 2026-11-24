@@ -10,7 +10,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "postinstall": "electron-rebuild -f -w better-sqlite3",
+    "postinstall": "node scripts/rebuild-electron.js",
     "electron": "electron .",
     "desktop": "npm run build && electron ."
   },
