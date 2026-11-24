@@ -1,0 +1,41 @@
+
+workflows:
+  iglesia-ios-simulator:
+    name: Iglesia - Compilacion iOS
+    max_build_duration: 120
+    instance_type: mac_mini_m2
+
+    environment:
+      node: v24.14.1
+      xcode: latest
+
+    scripts:
+      - name: Instalar dependencias
+        script: npm ci --ignore-scripts
+
+      - name: Compilar Angular
+        script: npx ng build --configuration production --base-href ./
+
+      - name: Sincronizar Capacitor
+        script: npx cap sync ios
+
+      - name: Verificar proyecto Xcode
+        script: xcodebuild -list -project ios/App/App.xcodeproj
+
+      - name: Compilar aplicacion para simulador iOS
+        script: |
+          xcodebuild build \
+            -project "$CM_BUILD_DIR/ios/App/App.xcodeproj" \
+            -scheme "App" \
+            -sdk iphonesimulator \
+            -destination 'generic/platform=iOS Simulator' \
+            -configuration Debug \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios/derived" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+    artifacts:
+      - build/ios/derived/Build/Products/Debug-iphonesimulator/*.app
+      - build/ios/derived/Build/Products/Debug-iphonesimulator/*.dSYM
+      - /tmp/xcodebuild_logs/*.log
