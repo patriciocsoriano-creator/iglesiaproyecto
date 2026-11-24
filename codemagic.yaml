@@ -1,7 +1,7 @@
 
 workflows:
-  iglesia-ios-simulator:
-    name: Iglesia - Compilacion iOS
+  iglesia-ios-device:
+    name: Iglesia - Compilacion iPhone
     max_build_duration: 120
     instance_type: mac_mini_m2
 
@@ -22,20 +22,26 @@ workflows:
       - name: Verificar proyecto Xcode
         script: xcodebuild -list -project ios/App/App.xcodeproj
 
-      - name: Compilar aplicacion para simulador iOS
+      - name: Compilar para iPhone fisico sin firma
         script: |
           xcodebuild build \
             -project "$CM_BUILD_DIR/ios/App/App.xcodeproj" \
             -scheme "App" \
-            -sdk iphonesimulator \
-            -destination 'generic/platform=iOS Simulator' \
-            -configuration Debug \
-            -derivedDataPath "$CM_BUILD_DIR/build/ios/derived" \
+            -sdk iphoneos \
+            -destination 'generic/platform=iOS' \
+            -configuration Release \
+            -derivedDataPath "$CM_BUILD_DIR/build/ios/device" \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
+      - name: Comprimir aplicacion
+        script: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            "$CM_BUILD_DIR/build/ios/device/Build/Products/Release-iphoneos/App.app" \
+            "$CM_BUILD_DIR/App-iphone-unsigned.zip"
+
     artifacts:
-      - build/ios/derived/Build/Products/Debug-iphonesimulator/*.app
-      - build/ios/derived/Build/Products/Debug-iphonesimulator/*.dSYM
+      - build/ios/device/Build/Products/Release-iphoneos/*.app
+      - App-iphone-unsigned.zip
       - /tmp/xcodebuild_logs/*.log
