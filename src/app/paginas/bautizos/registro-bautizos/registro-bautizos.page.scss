@@ -1,0 +1,348 @@
+
+:host {
+  display: block;
+  --color-principal: #17365d;
+  --color-secundario: #c49a45;
+  --color-fondo: #f4f6fa;
+}
+
+.toolbar-bautizos {
+  --background: #17365d;
+  --color: #ffffff;
+  --min-height: 64px;
+}
+
+.contenido-bautizos {
+  --background: #f4f6fa;
+}
+
+.contenedor {
+  width: min(1100px, 94%);
+  margin: 28px auto 45px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+
+  h1 {
+    margin: 0 0 7px;
+    color: #17365d;
+    font-size: 25px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 0;
+    color: #718096;
+    font-size: 14px;
+  }
+}
+
+.icono-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: #e6edf7;
+  color: #17365d;
+
+  ion-icon {
+    font-size: 29px;
+  }
+}
+
+.tarjeta {
+  padding: 25px;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #e5eaf1;
+  border-radius: 15px;
+  box-shadow: 0 4px 16px rgba(27, 47, 75, 0.045);
+}
+
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 23px;
+
+  h2 {
+    margin: 0 0 5px;
+    color: #203b5e;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #8290a3;
+    font-size: 13px;
+  }
+}
+
+.titulo-icono {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px;
+  height: 43px;
+  flex-shrink: 0;
+  border-radius: 12px;
+  background: #edf2f8;
+  color: #24466e;
+
+  ion-icon {
+    font-size: 22px;
+  }
+}
+
+.rejilla {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 22px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  min-width: 0;
+
+  ion-label {
+    color: #34445a;
+    font-size: 13px;
+    font-weight: 650;
+
+    span {
+      color: #c04444;
+    }
+  }
+
+  ion-input,
+  ion-select,
+  ion-textarea {
+    --background: #ffffff;
+    --color: #26364a;
+    --placeholder-color: #9aa5b4;
+    --placeholder-opacity: 1;
+    font-size: 14px;
+  }
+
+  ion-textarea {
+    border: 1px solid #d9e0e9;
+    border-radius: 9px;
+    padding: 8px 12px;
+  }
+}
+
+.tarjeta-firma {
+  background: #fbfcfe;
+}
+
+.firma-vista {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  max-width: 420px;
+  min-height: 170px;
+  margin: 0 auto;
+  padding: 18px;
+  text-align: center;
+
+  strong {
+    color: #263b57;
+    font-size: 15px;
+    margin-top: 8px;
+  }
+
+  span {
+    color: #64748b;
+    font-size: 13px;
+    margin-top: 4px;
+  }
+}
+
+.imagen-firma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90px;
+  width: 100%;
+
+  img {
+    max-width: 230px;
+    max-height: 85px;
+    object-fit: contain;
+  }
+}
+
+.sin-imagen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90px;
+  color: #8995a5;
+  font-size: 13px;
+}
+
+.linea-firma {
+  width: 260px;
+  max-width: 90%;
+  border-top: 1px solid #66758a;
+}
+
+.nota-firma {
+  margin: 10px 0 0;
+  color: #718096;
+  text-align: center;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 25px;
+
+  ion-button {
+    height: 46px;
+    --border-radius: 9px;
+    font-weight: 650;
+    text-transform: none;
+  }
+}
+
+.boton-regresar {
+  --color: #24466e;
+  --border-color: #b8c5d5;
+}
+
+.boton-guardar {
+  --background: #17365d;
+  --background-hover: #244a78;
+  --color: #ffffff;
+}
+
+.aviso-cargando {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 12px;
+  padding: 35px;
+  color: #52647c;
+}
+
+.mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #f0c9c9;
+  border-radius: 9px;
+  background: #fff3f3;
+  color: #a33d3d;
+  font-size: 13px;
+}
+
+.confirmacion-guardado {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 9px;
+  padding: 15px;
+  margin-top: 16px;
+  border-radius: 9px;
+  background: #eaf6ee;
+  color: #28623d;
+  font-size: 13px;
+
+  ion-icon {
+    font-size: 21px;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .contenedor {
+    width: 94%;
+    margin-top: 20px;
+  }
+
+  .encabezado h1 {
+    font-size: 21px;
+  }
+
+  .tarjeta {
+    padding: 18px 15px;
+  }
+
+  .rejilla {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .acciones {
+    flex-direction: column-reverse;
+
+    ion-button {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+
+/* =========================================
+   SELECTOR DE IGLESIAS Y CAPILLAS
+========================================= */
+
+.campo-lugar-bautizo {
+
+  ion-select {
+    width: 100%;
+    min-height: 52px;
+    --background: #ffffff;
+    --color: #263b57;
+    --placeholder-color: #8996a8;
+    --placeholder-opacity: 1;
+    --padding-start: 15px;
+    --padding-end: 15px;
+    --border-color: #cbd5e1;
+    --border-radius: 9px;
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  ion-select::part(icon) {
+    color: #17365d;
+    font-size: 19px;
+    opacity: 1;
+  }
+
+  ion-select::part(text) {
+    color: #263b57;
+    font-weight: 600;
+  }
+
+  .ayuda-lugar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 2px 0;
+    color: #287447;
+    font-size: 12px;
+
+    ion-icon {
+      font-size: 17px;
+    }
+  }
+}
+

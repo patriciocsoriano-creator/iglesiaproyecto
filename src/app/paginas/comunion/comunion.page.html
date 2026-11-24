@@ -1,0 +1,58 @@
+
+<ion-header>
+  <ion-toolbar color="light">
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+    <ion-title>Primeras Comuniones</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="comunion-content">
+
+  <div class="contenedor">
+
+    <div class="encabezado">
+      <div class="icono-principal">
+        <ion-icon name="sunny-outline"></ion-icon>
+      </div>
+
+      <h1>Administración de Primeras Comuniones</h1>
+      <p>Gestione las inscripciones y registros sacramentales de nuestra parroquia.</p>
+    </div>
+
+    <div class="opciones">
+
+      <button class="tarjeta" (click)="abrirRegistro()">
+        <div class="icono">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+
+        <div class="informacion">
+          <h2>Inscripción de Comunión</h2>
+          <p>Registrar a un nuevo niño o niña para recibir el sacramento de la Primera Comunión.</p>
+        </div>
+
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+
+      <button class="tarjeta" (click)="abrirListado()">
+        <div class="icono">
+          <ion-icon name="list-outline"></ion-icon>
+        </div>
+
+        <div class="informacion">
+          <h2>Listado de Comunión</h2>
+          <p>Consultar, buscar y administrar las inscripciones registradas.</p>
+        </div>
+
+        <ion-icon name="chevron-forward-outline"></ion-icon>
+      </button>
+
+    </div>
+
+  </div>
+
+</ion-content>

@@ -1,0 +1,107 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-confirmacion">
+
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Confirmación</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="confirmacion-content">
+
+  <div class="contenedor-confirmacion">
+
+    <!-- ENCABEZADO PRINCIPAL -->
+    <div class="encabezado-confirmacion">
+
+      <div class="icono-principal">
+        <ion-icon name="flame-outline"></ion-icon>
+      </div>
+
+      <h1>Administración de Confirmaciones</h1>
+
+      <p>
+        Gestione los registros sacramentales de Confirmación
+        y consulte la información de los confirmados.
+      </p>
+
+      <div class="linea-decorativa">
+        <span></span>
+      </div>
+
+    </div>
+
+    <!-- OPCIONES DEL MÓDULO -->
+    <div class="opciones-confirmacion">
+
+      <!-- REGISTRO -->
+      <div
+  class="tarjeta-opcion"
+  (click)="abrirRegistro()"
+      >
+
+        <div class="icono-opcion registro">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+
+        <div class="contenido-opcion">
+          <h2>Registro de Confirmación</h2>
+
+          <p>
+            Registre nuevos sacramentos de Confirmación
+            y almacene sus datos en el sistema parroquial.
+          </p>
+        </div>
+
+        <div class="flecha-opcion">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+
+      </div>
+
+      <!-- LISTADO -->
+      <div
+  class="tarjeta-opcion"
+  (click)="abrirListado()"
+      >
+
+        <div class="icono-opcion listado">
+          <ion-icon name="list-outline"></ion-icon>
+        </div>
+
+        <div class="contenido-opcion">
+          <h2>Listado de Confirmaciones</h2>
+
+          <p>
+            Consulte los registros existentes, revise
+            información y genere certificados sacramentales.
+          </p>
+        </div>
+
+        <div class="flecha-opcion">
+          <ion-icon name="chevron-forward-outline"></ion-icon>
+        </div>
+
+      </div>
+
+    </div>
+
+    <!-- PIE INFORMATIVO -->
+    <div class="pie-confirmacion">
+      <ion-icon name="information-circle-outline"></ion-icon>
+
+      <span>
+        Sistema de Administración Parroquial
+        <strong>San Rafael Arcángel</strong>
+      </span>
+    </div>
+
+  </div>
+
+</ion-content>

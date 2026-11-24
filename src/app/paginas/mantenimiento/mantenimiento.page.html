@@ -1,0 +1,361 @@
+
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>Mantenimiento</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="mantenimiento-content">
+
+  <div class="contenedor-principal">
+
+    <!-- ENCABEZADO -->
+    
+<!-- ENCABEZADO -->
+<div class="encabezado">
+
+  <div class="encabezado-superior">
+    <ion-button
+      fill="outline"
+      color="medium"
+      class="boton-regresar"
+      (click)="regresar()">
+
+      <ion-icon
+        slot="start"
+        name="arrow-back-outline">
+      </ion-icon>
+
+      Regresar a pantalla principal
+
+    </ion-button>
+  </div>
+
+  <div class="encabezado-contenido">
+
+    <div class="icono-encabezado">
+      <ion-icon name="settings-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h1>Configuración parroquial</h1>
+      <p>
+        Administra la identidad institucional y los datos del párroco
+        que aparecerán en los documentos parroquiales.
+      </p>
+    </div>
+
+  </div>
+
+</div>
+
+
+    <!-- MENSAJES -->
+    <div class="mensaje" *ngIf="mensaje">
+      <ion-icon name="information-circle-outline"></ion-icon>
+      <span>{{ mensaje }}</span>
+    </div>
+
+    <div class="indicador-carga" *ngIf="cargando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando configuración...</span>
+    </div>
+
+    <!-- IDENTIDAD INSTITUCIONAL -->
+    <section class="seccion">
+
+      <div class="seccion-titulo">
+        <div class="seccion-icono">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+
+        <div>
+          <h2>Identidad institucional</h2>
+          <p>Información que aparecerá en el encabezado de los documentos.</p>
+        </div>
+      </div>
+
+      <div class="formulario">
+
+        <div class="campo">
+          <label for="diocesis">Nombre de la diócesis</label>
+          <ion-input
+            id="diocesis"
+            name="diocesis"
+            type="text"
+            placeholder="Ej. Diócesis de Santa Elena"
+            [(ngModel)]="parroco.diocesisNombre">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <label for="vicaria">Nombre de la vicaría</label>
+          <ion-input
+            id="vicaria"
+            name="vicaria"
+            type="text"
+            placeholder="Ej. Vicaría San José"
+            [(ngModel)]="parroco.vicariaNombre">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <label for="parroquia">Nombre de la parroquia</label>
+          <ion-input
+            id="parroquia"
+            name="parroquia"
+            type="text"
+            placeholder="Ej. Parroquia San Rafael Arcángel de Muey"
+            [(ngModel)]="parroco.parroquiaNombre">
+          </ion-input>
+        </div>
+
+      </div>
+
+      <!-- LOGOTIPOS -->
+      <div class="logos-contenedor">
+
+        <!-- LOGO DIÓCESIS -->
+        <div class="logo-panel">
+
+          <div class="logo-panel-titulo">
+            <ion-icon name="image-outline"></ion-icon>
+            <div>
+              <h3>Logo de la diócesis</h3>
+              <p>Imagen institucional de la diócesis.</p>
+            </div>
+          </div>
+
+          <div class="logo-preview">
+            <img
+              *ngIf="parroco.logoDiocesisData"
+              [src]="parroco.logoDiocesisData"
+              alt="Logo de la diócesis">
+
+            <div class="logo-vacio" *ngIf="!parroco.logoDiocesisData">
+              <ion-icon name="image-outline"></ion-icon>
+              <span>Sin logo seleccionado</span>
+            </div>
+          </div>
+
+          <label class="boton-archivo">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            Seleccionar logo
+
+            <input
+              type="file"
+              accept="image/png,image/jpeg"
+              (change)="seleccionarImagen($event, 'diocesis')">
+          </label>
+
+          <small>Formatos PNG o JPG. Máximo 2 MB.</small>
+
+        </div>
+
+        <!-- LOGO PARROQUIA -->
+        <div class="logo-panel">
+
+          <div class="logo-panel-titulo">
+            <ion-icon name="image-outline"></ion-icon>
+            <div>
+              <h3>Logo de la parroquia</h3>
+              <p>Imagen institucional de la parroquia.</p>
+            </div>
+          </div>
+
+          <div class="logo-preview">
+            <img
+              *ngIf="parroco.logoParroquiaData"
+              [src]="parroco.logoParroquiaData"
+              alt="Logo de la parroquia">
+
+            <div class="logo-vacio" *ngIf="!parroco.logoParroquiaData">
+              <ion-icon name="image-outline"></ion-icon>
+              <span>Sin logo seleccionado</span>
+            </div>
+          </div>
+
+          <label class="boton-archivo">
+            <ion-icon name="cloud-upload-outline"></ion-icon>
+            Seleccionar logo
+
+            <input
+              type="file"
+              accept="image/png,image/jpeg"
+              (change)="seleccionarImagen($event, 'parroquia')">
+          </label>
+
+          <small>Formatos PNG o JPG. Máximo 2 MB.</small>
+
+        </div>
+
+
+<!-- SELLO DE LA PARROQUIA -->
+<div class="logo-panel">
+
+  <div class="logo-panel-titulo">
+    <ion-icon name="stamp-outline"></ion-icon>
+    <div>
+      <h3>Sello de la parroquia</h3>
+      <p>Sello oficial que aparecerá en los certificados parroquiales.</p>
+    </div>
+  </div>
+
+  <div class="logo-preview">
+    <img
+      *ngIf="parroco.selloParroquiaData"
+      [src]="parroco.selloParroquiaData"
+      alt="Sello oficial de la parroquia">
+
+    <div class="logo-vacio" *ngIf="!parroco.selloParroquiaData">
+      <ion-icon name="stamp-outline"></ion-icon>
+      <span>Sin sello seleccionado</span>
+    </div>
+  </div>
+
+  <label class="boton-archivo">
+    <ion-icon name="cloud-upload-outline"></ion-icon>
+    Seleccionar sello
+
+    <input
+      type="file"
+      accept="image/png,image/jpeg"
+      (change)="seleccionarImagen($event, 'sello')">
+  </label>
+
+  <small>Formatos PNG o JPG. Máximo 2 MB.</small>
+
+</div>
+
+
+      </div>
+
+    </section>
+
+    <!-- DATOS DEL PÁRROCO -->
+    <section class="seccion">
+
+      <div class="seccion-titulo">
+        <div class="seccion-icono">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+
+        <div>
+          <h2>Datos del párroco</h2>
+          <p>Información del sacerdote responsable de la parroquia.</p>
+        </div>
+      </div>
+
+      <div class="formulario">
+
+        <div class="campo">
+          <label for="nombreParroco">Nombre completo del párroco</label>
+          <ion-input
+            id="nombreParroco"
+            name="nombreParroco"
+            type="text"
+            placeholder="Ingrese el nombre completo"
+            [(ngModel)]="parroco.nombre">
+          </ion-input>
+        </div>
+
+        <div class="campo">
+          <label for="pieFirma">Cargo o pie de firma</label>
+          <ion-input
+            id="pieFirma"
+            name="pieFirma"
+            type="text"
+            placeholder="Ej. Párroco"
+            [(ngModel)]="parroco.pieFirma">
+          </ion-input>
+        </div>
+
+      </div>
+
+      <!-- FIRMA DIGITAL -->
+      <div class="firma-contenedor">
+
+        <div class="firma-informacion">
+          <div class="firma-icono">
+            <ion-icon name="create-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h3>Firma digital del párroco</h3>
+            <p>
+              Esta firma se utilizará en los documentos parroquiales
+              que se generen desde el sistema.
+            </p>
+          </div>
+        </div>
+
+        <div class="firma-preview">
+
+          <img
+            *ngIf="firmaPreview"
+            [src]="firmaPreview"
+            alt="Firma digital del párroco">
+
+          <div class="firma-vacia" *ngIf="!firmaPreview">
+            <ion-icon name="create-outline"></ion-icon>
+            <span>Sin firma seleccionada</span>
+          </div>
+
+        </div>
+
+        <label class="boton-archivo boton-firma">
+          <ion-icon name="cloud-upload-outline"></ion-icon>
+          Seleccionar firma digital
+
+          <input
+            type="file"
+            accept="image/png,image/jpeg"
+            (change)="seleccionarImagen($event, 'firma')">
+        </label>
+
+        <small>Formatos PNG o JPG. Máximo 2 MB.</small>
+
+      </div>
+
+    </section>
+
+    <!-- NOTA INFORMATIVA -->
+    <div class="nota-informativa">
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
+
+      <p>
+        Los cambios realizados en esta sección se aplicarán a los documentos
+        parroquiales que se consulten o generen posteriormente. Los datos
+        propios de cada sacramento se conservarán.
+      </p>
+    </div>
+
+    <!-- BOTONES -->
+    <div class="acciones">
+
+      <ion-button
+        expand="block"
+        class="boton-guardar"
+        [disabled]="cargando || guardando"
+        (click)="guardarConfiguracion()">
+
+        <ion-spinner
+          *ngIf="guardando"
+          name="crescent">
+        </ion-spinner>
+
+        <ion-icon
+          *ngIf="!guardando"
+          slot="start"
+          name="save-outline">
+        </ion-icon>
+
+        {{ guardando ? 'Guardando configuración...' : 'Guardar configuración' }}
+
+      </ion-button>
+
+    </div>
+
+  </div>
+
+</ion-content>

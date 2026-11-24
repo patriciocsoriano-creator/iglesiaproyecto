@@ -1,0 +1,554 @@
+
+:host {
+  --azul-principal: #17365d;
+  --azul-secundario: #244b75;
+  --dorado: #c49a45;
+  --fondo: #f4f6f9;
+  --texto: #263445;
+}
+
+.toolbar-registro {
+  --background: #ffffff;
+  --color: var(--azul-principal);
+  border-bottom: 1px solid #e8edf3;
+
+  ion-title {
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  ion-button {
+    --color: var(--azul-principal);
+  }
+}
+
+.pagina-registro {
+  --background: var(--fondo);
+}
+
+.contenedor-formulario {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 28px 25px 45px;
+}
+
+/* ENCABEZADO */
+
+.encabezado-pagina {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 27px;
+
+  h1 {
+    margin: 0;
+    color: var(--azul-principal);
+    font-size: 29px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 7px 0 0;
+    color: #748194;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+}
+
+.subtitulo {
+  display: block;
+  margin-bottom: 5px;
+  color: var(--dorado);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+
+.icono-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 67px;
+  height: 67px;
+  min-width: 67px;
+  border-radius: 17px;
+  background: #eaf0f7;
+  border: 1px solid #dce6f1;
+
+  ion-icon {
+    color: var(--azul-principal);
+    font-size: 35px;
+  }
+}
+
+/* SECCIONES */
+
+.seccion-formulario {
+  padding: 24px;
+  margin-bottom: 20px;
+  background: #ffffff;
+  border: 1px solid #e5eaf0;
+  border-radius: 15px;
+  box-shadow: 0 3px 13px rgba(23, 54, 93, 0.035);
+}
+
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  margin-bottom: 23px;
+  padding-bottom: 17px;
+  border-bottom: 1px solid #edf0f4;
+
+  h2 {
+    margin: 0;
+    color: var(--azul-principal);
+    font-size: 17px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 5px 0 0;
+    color: #8792a0;
+    font-size: 12px;
+  }
+}
+
+.icono-seccion {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 43px;
+  height: 43px;
+  min-width: 43px;
+  border-radius: 11px;
+  background: #f8f2e6;
+
+  ion-icon {
+    color: #ad853b;
+    font-size: 23px;
+  }
+}
+
+.icono-azul {
+  background: #eaf0f7;
+
+  ion-icon {
+    color: var(--azul-principal);
+  }
+}
+
+.icono-dorado {
+  background: #f8f2e6;
+
+  ion-icon {
+    color: var(--dorado);
+  }
+}
+
+/* FORMULARIO */
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 19px 22px;
+}
+
+.campo {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  ion-label {
+    color: #42536a;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  ion-input {
+    --background: #fbfcfd;
+    --color: #263445;
+    --placeholder-color: #a0aab6;
+    --placeholder-opacity: 1;
+    --padding-start: 13px;
+    --padding-end: 13px;
+    --padding-top: 12px;
+    --padding-bottom: 12px;
+
+    min-height: 44px;
+    border: 1px solid #dfe5ec;
+    border-radius: 9px;
+    font-size: 13px;
+    transition: border-color 0.2s ease;
+  }
+
+  ion-input:focus-within {
+    border-color: var(--azul-secundario);
+  }
+}
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+/* FIRMA */
+
+.seccion-firma {
+  background: #fffefa;
+  border-color: #eee5d4;
+}
+
+.firma-contenido {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  padding: 18px;
+  background: #fbfaf7;
+  border: 1px solid #eee8dc;
+  border-radius: 12px;
+}
+
+.firma-imagen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 170px;
+  height: 90px;
+  padding: 8px;
+  background: #ffffff;
+  border: 1px dashed #d9d2c4;
+  border-radius: 9px;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+}
+
+.sin-firma {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  color: #9a9a91;
+  font-size: 11px;
+  text-align: center;
+
+  ion-icon {
+    font-size: 24px;
+  }
+}
+
+.firma-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+
+  strong {
+    color: var(--azul-principal);
+    font-size: 15px;
+  }
+
+  span {
+    color: #8a7650;
+    font-size: 12px;
+    font-weight: 600;
+  }
+}
+
+.nota-firma {
+  display: flex;
+  gap: 9px;
+  align-items: flex-start;
+  margin-top: 15px;
+  color: #81765f;
+
+  ion-icon {
+    flex-shrink: 0;
+    margin-top: 2px;
+    color: var(--dorado);
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 11px;
+    line-height: 1.6;
+  }
+}
+
+/* MENSAJES */
+
+.estado-carga {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 22px;
+  margin-bottom: 18px;
+  background: #ffffff;
+  border: 1px solid #e5eaf0;
+  border-radius: 12px;
+  color: #66768a;
+  font-size: 13px;
+
+  ion-spinner {
+    color: var(--azul-principal);
+  }
+}
+
+.mensaje-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  color: #a33b3b;
+  background: #fff1f0;
+  border: 1px solid #f3d2cf;
+  border-radius: 10px;
+  font-size: 12px;
+  line-height: 1.5;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 19px;
+  }
+}
+
+.confirmacion-registro {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 17px 20px;
+  margin-bottom: 20px;
+  background: #edf8f0;
+  border: 1px solid #d1ead7;
+  border-radius: 11px;
+  color: #27643b;
+
+  > ion-icon {
+    font-size: 29px;
+  }
+
+  strong {
+    font-size: 13px;
+  }
+
+  p {
+    margin: 5px 0 0;
+    font-size: 12px;
+  }
+}
+
+/* ACCIONES */
+
+.acciones-formulario {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  padding: 19px;
+  background: #ffffff;
+  border: 1px solid #e5eaf0;
+  border-radius: 13px;
+
+  ion-button {
+    min-height: 43px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: none;
+    --border-radius: 9px;
+  }
+}
+
+.boton-secundario {
+  --color: var(--azul-principal);
+  --border-color: #cbd5e1;
+}
+
+.boton-nuevo {
+  --color: #946f2f;
+  --border-color: #d9c69e;
+}
+
+.boton-guardar {
+  --background: var(--azul-principal);
+  --background-hover: var(--azul-secundario);
+  --color: #ffffff;
+  --box-shadow: none;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 700px) {
+
+  .contenedor-formulario {
+    padding: 20px 14px 35px;
+  }
+
+  .encabezado-pagina {
+    align-items: flex-start;
+    gap: 13px;
+
+    h1 {
+      font-size: 23px;
+    }
+
+    p {
+      font-size: 12px;
+    }
+  }
+
+  .icono-encabezado {
+    width: 55px;
+    height: 55px;
+    min-width: 55px;
+
+    ion-icon {
+      font-size: 29px;
+    }
+  }
+
+  .seccion-formulario {
+    padding: 18px 15px;
+  }
+
+  .formulario-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+  .firma-contenido {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .firma-imagen {
+    width: 100%;
+    max-width: 230px;
+  }
+
+  .acciones-formulario {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    ion-button {
+      width: 100%;
+    }
+  }
+
+}
+.mensaje-busqueda {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin: 8px 12px 14px;
+  padding: 11px 13px;
+  border-radius: 8px;
+  background: #fff5e5;
+  color: #94651c;
+  font-size: 13px;
+
+  ion-spinner {
+    width: 18px;
+    height: 18px;
+  }
+
+  ion-icon {
+    font-size: 19px;
+    flex-shrink: 0;
+  }
+
+  &.exito {
+    background: #eaf6ee;
+    color: #247443;
+  }
+}
+/* =====================================
+   CAMPOS DE CÉDULA - ESPOSO Y ESPOSA
+===================================== */
+
+ion-item {
+  --background: #ffffff;
+  --color: #263445;
+  --border-color: #dce2e9;
+  --highlight-color-focused: #c49a45;
+  --highlight-color-valid: #c49a45;
+  --highlight-color-invalid: #c49a45;
+  --box-shadow: none;
+}
+
+/* Eliminar fondo oscuro al enfocar */
+ion-item.item-has-focus {
+  --background: #ffffff;
+  --highlight-background: #c49a45;
+}
+
+/* Campo de texto */
+ion-input {
+  --background: transparent;
+  --color: #263445;
+  --placeholder-color: #929ba7;
+  --highlight-color: #c49a45;
+}
+
+/* Evitar contornos negros */
+ion-input:focus,
+ion-input.has-focus {
+  outline: none;
+  box-shadow: none;
+}
+
+/* ==========================================
+   SELECTOR DEL LUGAR DE CELEBRACIÓN
+========================================== */
+
+.campo-lugar-matrimonio {
+  width: 100%;
+
+  ion-label {
+    display: block;
+    margin-bottom: 9px;
+    color: #263449;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  ion-select {
+    display: block;
+    width: 100%;
+    min-height: 48px;
+
+    --background: #ffffff;
+    --color: #263449;
+    --placeholder-color: #8993a3;
+    --placeholder-opacity: 1;
+
+    padding: 0 14px;
+    border: 1px solid #dce2ea;
+    border-radius: 10px;
+
+    font-size: 14px;
+    font-weight: 500;
+    box-sizing: border-box;
+  }
+
+  ion-select::part(icon) {
+    color: #64748b;
+    opacity: 1;
+  }
+
+  ion-select::part(text) {
+    color: #263449;
+  }
+}

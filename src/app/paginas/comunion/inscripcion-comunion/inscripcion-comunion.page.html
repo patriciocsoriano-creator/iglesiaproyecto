@@ -1,0 +1,466 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-comunion">
+
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Inscripción de Primera Comunión</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido-comunion">
+
+  <div class="contenedor-comunion">
+
+    <!-- ENCABEZADO -->
+    <div class="encabezado-comunion">
+      <div class="icono-encabezado">
+        <ion-icon name="sunny-outline"></ion-icon>
+      </div>
+
+      <h1>Registro de Primera Comunión</h1>
+
+      <p>
+        Complete la información del niño o niña para registrar
+        correctamente la celebración del sacramento.
+      </p>
+    </div>
+
+    <!-- CARGA DE CONFIGURACIÓN -->
+    <div class="estado-carga" *ngIf="cargandoParroco">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando configuración parroquial...</p>
+    </div>
+
+    <div class="mensaje-error" *ngIf="mensajeError">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>{{ mensajeError }}</span>
+    </div>
+
+    <ng-container *ngIf="!cargandoParroco">
+
+      <!-- ========================================= -->
+      <!-- 1. DATOS DEL SACRAMENTO -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+        <div class="titulo-seccion">
+          <div class="icono-seccion">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Datos del sacramento</h2>
+            <p>Información correspondiente al registro parroquial.</p>
+          </div>
+        </div>
+
+        <div class="formulario-grid">
+
+          <div class="campo">
+            <ion-label>Número de comunión *</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.numero_comunion"
+              placeholder="Ej. 001"
+              maxlength="30">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Fecha de comunión *</ion-label>
+            <ion-input
+              type="date"
+              [(ngModel)]="comunion.fecha_comunion">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Tomo</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.tomo_comunion"
+              placeholder="Número de tomo"
+              maxlength="30">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Página</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.pagina_comunion"
+              placeholder="Número de página"
+              maxlength="30">
+            </ion-input>
+          </div>
+
+          <div class="campo campo-completo campo-lugar">
+            <ion-label>Lugar de celebración *</ion-label>
+
+            <ion-select
+              [(ngModel)]="comunion.lugar_comunion"
+              interface="popover"
+              placeholder="Seleccione el lugar">
+
+              <ion-select-option
+                *ngFor="let lugar of lugaresComunion"
+                [value]="lugar">
+                {{ lugar }}
+              </ion-select-option>
+
+            </ion-select>
+          </div>
+
+          <div class="campo campo-completo">
+            <ion-label>Ministro que celebró el sacramento *</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.ministro"
+              placeholder="Nombre completo del ministro"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================= -->
+      <!-- 2. DATOS PERSONALES -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+        <div class="titulo-seccion">
+          <div class="icono-seccion">
+            <ion-icon name="person-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Datos del niño o niña</h2>
+            <p>Información personal del participante.</p>
+          </div>
+        </div>
+
+        <div class="formulario-grid">
+
+          <div class="campo campo-completo">
+            <ion-label>Número de cédula</ion-label>
+
+            <div class="campo-busqueda">
+              <ion-input
+                [(ngModel)]="comunion.cedula"
+                placeholder="Ingrese la cédula"
+                maxlength="20"
+                (keyup.enter)="buscarBautismo()">
+              </ion-input>
+
+              <ion-button
+                class="boton-buscar"
+                (click)="buscarBautismo()"
+                [disabled]="buscandoBautismo || !comunion.cedula.trim()">
+
+                <ion-spinner
+                  *ngIf="buscandoBautismo"
+                  name="crescent">
+                </ion-spinner>
+
+                <ion-icon
+                  *ngIf="!buscandoBautismo"
+                  name="search-outline">
+                </ion-icon>
+
+                <span *ngIf="!buscandoBautismo">Buscar bautismo</span>
+
+              </ion-button>
+            </div>
+
+            <p class="ayuda-campo">
+              Consulte si existe un registro de bautismo en esta parroquia
+              o en sus capillas.
+            </p>
+          </div>
+
+          <!-- RESULTADO DE BÚSQUEDA -->
+
+          <div
+            class="resultado-bautismo encontrado"
+            *ngIf="bautismoEncontrado === true">
+
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
+
+            <div>
+              <strong>Registro de bautismo encontrado</strong>
+              <p>Se completaron los datos de parroquia y fecha de bautismo.</p>
+            </div>
+
+          </div>
+
+          <div
+            class="resultado-bautismo no-encontrado"
+            *ngIf="bautismoEncontrado === false">
+
+            <ion-icon name="information-circle-outline"></ion-icon>
+
+            <div>
+              <strong>No se encontró un registro local</strong>
+              <p>
+                Esto no significa que el niño o niña no esté bautizado.
+                Puede ingresar manualmente los datos del bautismo.
+              </p>
+            </div>
+
+          </div>
+
+          <div class="campo">
+            <ion-label>Nombres *</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.nombres"
+              placeholder="Nombres completos"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Apellidos *</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.apellidos"
+              placeholder="Apellidos completos"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Lugar de nacimiento</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.lugar_nacimiento"
+              placeholder="Ciudad o cantón"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Fecha de nacimiento *</ion-label>
+            <ion-input
+              type="date"
+              [(ngModel)]="comunion.fecha_nacimiento">
+            </ion-input>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================= -->
+      <!-- 3. DATOS DEL BAUTISMO -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+        <div class="titulo-seccion">
+          <div class="icono-seccion">
+            <ion-icon name="water-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Datos del bautismo</h2>
+            <p>Información del sacramento recibido anteriormente.</p>
+          </div>
+        </div>
+
+        <div class="formulario-grid">
+
+          <div class="campo campo-completo">
+            <ion-label>Parroquia donde fue bautizado *</ion-label>
+
+            <ion-input
+              [(ngModel)]="comunion.parroquia_bautismo"
+              placeholder="Ingrese el nombre de la parroquia"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Fecha de bautismo *</ion-label>
+
+            <ion-input
+              type="date"
+              [(ngModel)]="comunion.fecha_bautismo">
+            </ion-input>
+          </div>
+
+        </div>
+
+      </section>
+
+      <!-- ========================================= -->
+      <!-- 4. PADRES Y PADRINOS -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+        <div class="titulo-seccion">
+          <div class="icono-seccion">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Padres y padrinos</h2>
+            <p>Información familiar del niño o niña.</p>
+          </div>
+        </div>
+
+        <div class="formulario-grid">
+
+          <div class="campo">
+            <ion-label>Nombre del padre</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.nombre_padre"
+              placeholder="Nombre completo"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Nombre de la madre</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.nombre_madre"
+              placeholder="Nombre completo"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Nombre del padrino</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.padrino"
+              placeholder="Nombre completo"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Nombre de la madrina</ion-label>
+            <ion-input
+              [(ngModel)]="comunion.madrina"
+              placeholder="Nombre completo"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================= -->
+      <!-- 5. FIRMA PARROQUIAL -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario seccion-firma">
+
+        <div class="titulo-seccion">
+          <div class="icono-seccion">
+            <ion-icon name="create-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Firma parroquial vigente</h2>
+            <p>Datos obtenidos desde el módulo Mantenimiento.</p>
+          </div>
+        </div>
+
+        <div class="firma-contenido">
+
+          <div class="firma-imagen">
+
+            <img
+              *ngIf="parroco.firmaPreview"
+              [src]="parroco.firmaPreview"
+              alt="Firma del párroco">
+
+            <div
+              class="sin-firma"
+              *ngIf="!parroco.firmaPreview">
+
+              <ion-icon name="image-outline"></ion-icon>
+              <span>No hay una firma registrada</span>
+
+            </div>
+
+          </div>
+
+          <div class="firma-datos">
+            <strong>{{ parroco.nombre || 'Nombre del párroco' }}</strong>
+            <span>{{ parroco.pieFirma || 'Párroco' }}</span>
+          </div>
+
+        </div>
+
+        <p class="nota-firma">
+          La firma y los datos del párroco se conservarán como copia
+          histórica al momento de registrar la Primera Comunión.
+        </p>
+
+      </section>
+
+      <!-- ========================================= -->
+      <!-- MENSAJE DE REGISTRO -->
+      <!-- ========================================= -->
+
+      <div
+        class="confirmacion-registro"
+        *ngIf="comunionGuardada">
+
+        <ion-icon name="checkmark-circle"></ion-icon>
+
+        <div>
+          <strong>Primera Comunión registrada correctamente</strong>
+          <p>Número de registro: {{ comunionId }}</p>
+        </div>
+
+      </div>
+
+      <!-- ========================================= -->
+      <!-- BOTONES -->
+      <!-- ========================================= -->
+
+      <div class="acciones-formulario">
+
+        <ion-button
+          class="boton-secundario"
+          fill="outline"
+          (click)="regresar()"
+          [disabled]="guardando">
+
+          <ion-icon name="arrow-back-outline" slot="start"></ion-icon>
+          Regresar
+
+        </ion-button>
+
+        <ion-button
+          class="boton-guardar"
+          (click)="guardarComunion()"
+          [disabled]="guardando || cargandoParroco">
+
+          <ion-spinner
+            *ngIf="guardando"
+            name="crescent">
+          </ion-spinner>
+
+          <ion-icon
+            *ngIf="!guardando"
+            name="save-outline"
+            slot="start">
+          </ion-icon>
+
+          {{ guardando ? 'Guardando...' : 'Guardar Primera Comunión' }}
+
+        </ion-button>
+
+      </div>
+
+    </ng-container>
+
+  </div>
+
+</ion-content>

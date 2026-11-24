@@ -68,3 +68,46 @@ testem.log
 # System files
 .DS_Store
 Thumbs.db
+
+# ==========================================
+# PROTECCION DE IGLESIA
+# ==========================================
+
+# Bases de datos locales
+*.db
+*.sqlite
+*.sqlite3
+
+# Variables y configuraciones privadas
+.env
+.env.*
+!.env.example
+
+# Certificados y claves privadas
+*.pem
+*.key
+*.p12
+*.pfx
+*.mobileprovision
+
+# Copias de seguridad
+*.bak
+*.backup
+
+# Archivos temporales
+*.log.*
+
+# Archivos auxiliares locales de pruebas
+/eliminar-bautizo.js
+/test-sqlite.js
+/verificar-bautizo.js
+
+# Proteccion adicional de Android
+/android/local.properties
+/android/.gradle/
+/android/app/build/
+/android/app/*.jks
+/android/app/*.keystore
+*.jks
+*.keystore
+

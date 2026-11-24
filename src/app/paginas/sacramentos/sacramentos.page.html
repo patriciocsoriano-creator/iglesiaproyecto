@@ -1,0 +1,86 @@
+
+<ion-content [fullscreen]="true" class="sacramentos-content">
+
+  <div class="contenedor">
+
+    <header class="encabezado">
+      <div class="icono-principal">
+        <ion-icon name="book-outline"></ion-icon>
+      </div>
+
+      <div class="titulo">
+        <span class="subtitulo">ADMINISTRACIÓN PARROQUIAL</span>
+        <h1>Sacramentos</h1>
+        <p>Gestión de los sacramentos de nuestra comunidad parroquial.</p>
+      </div>
+    </header>
+
+    <div class="separador"></div>
+
+    <section class="seccion-opciones">
+      <div class="seccion-titulo">
+        <h2>Gestión sacramental</h2>
+        <p>Seleccione el sacramento que desea administrar.</p>
+      </div>
+
+      <div class="grid-sacramentos">
+
+        <button class="tarjeta" (click)="abrirSacramento('Bautizos')">
+          <div class="icono tarjeta-bautismo">
+            <ion-icon name="water-outline"></ion-icon>
+          </div>
+          <div class="informacion">
+            <h3>Bautizos</h3>
+            <p>Registros y administración de bautismos.</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="flecha"></ion-icon>
+        </button>
+
+        <button class="tarjeta" (click)="abrirSacramento('Primeras Comuniones')">
+          <div class="icono tarjeta-comunion">
+            <ion-icon name="sunny-outline"></ion-icon>
+          </div>
+          <div class="informacion">
+            <h3>Primeras Comuniones</h3>
+            <p>Registros de niños y celebración del sacramento.</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="flecha"></ion-icon>
+        </button>
+
+        <button class="tarjeta" (click)="abrirSacramento('Confirmaciones')">
+          <div class="icono tarjeta-confirmacion">
+            <ion-icon name="flame-outline"></ion-icon>
+          </div>
+          <div class="informacion">
+            <h3>Confirmaciones</h3>
+            <p>Administración de registros de confirmación.</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="flecha"></ion-icon>
+        </button>
+
+        <button class="tarjeta" (click)="abrirSacramento('Matrimonios')">
+          <div class="icono tarjeta-matrimonio">
+            <ion-icon name="heart-outline"></ion-icon>
+          </div>
+          <div class="informacion">
+            <h3>Matrimonios</h3>
+            <p>Registros y documentación matrimonial.</p>
+          </div>
+          <ion-icon name="chevron-forward-outline" class="flecha"></ion-icon>
+        </button>
+
+      </div>
+    </section>
+
+    <footer class="pie">
+      <button class="btn-regresar" (click)="regresarMenu()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+        Regresar al menú principal
+      </button>
+
+      <span>IGLESIA · Administración Parroquial</span>
+    </footer>
+
+  </div>
+
+</ion-content>

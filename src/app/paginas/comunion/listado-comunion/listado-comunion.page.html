@@ -1,0 +1,544 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-listado">
+
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()" aria-label="Regresar">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Listado de primeras comuniones</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button
+        (click)="cargarComuniones()"
+        [disabled]="cargando"
+        aria-label="Actualizar registros">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content [fullscreen]="true" class="contenido-listado">
+
+  <div class="contenedor-principal">
+
+    <!-- ENCABEZADO -->
+    <section class="encabezado-pagina">
+
+      <div class="encabezado-texto">
+        <span class="subtitulo">GESTIÓN SACRAMENTAL</span>
+
+        <h1>Primeras Comuniones</h1>
+
+        <p>
+          Consulta, revisa y administra los registros de Primera Comunión
+          de la parroquia.
+        </p>
+      </div>
+
+      <div class="icono-encabezado">
+        <ion-icon name="book-outline"></ion-icon>
+      </div>
+
+    </section>
+
+    <!-- RESUMEN -->
+    <section class="resumen-registros">
+
+      <div class="resumen-icono">
+        <ion-icon name="people-outline"></ion-icon>
+      </div>
+
+      <div class="resumen-informacion">
+        <span class="resumen-label">Registros encontrados</span>
+        <strong>{{ comuniones.length }}</strong>
+      </div>
+
+    </section>
+
+    <!-- BUSCADOR -->
+    <section class="panel-busqueda">
+
+      <div class="busqueda-texto">
+        <h2>Buscar registros</h2>
+        <p>Busca por número, cédula, nombres o apellidos.</p>
+      </div>
+
+      <div class="busqueda-controles">
+
+        <ion-searchbar
+          class="buscador"
+          placeholder="Escribe para buscar..."
+          [(ngModel)]="busqueda"
+          (keyup.enter)="buscarComuniones()"
+          debounce="300"
+          animated="true">
+        </ion-searchbar>
+
+        <ion-button
+          class="btn-buscar"
+          (click)="buscarComuniones()">
+          <ion-icon name="search-outline" slot="start"></ion-icon>
+          Buscar
+        </ion-button>
+
+        <ion-button
+          class="btn-limpiar"
+          fill="outline"
+          (click)="limpiarBusqueda()"
+          [disabled]="!busqueda">
+          <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+          Limpiar
+        </ion-button>
+
+      </div>
+
+    </section>
+
+    <!-- MENSAJE DE ERROR -->
+    <div class="mensaje-error" *ngIf="errorCarga">
+
+      <ion-icon name="alert-circle-outline"></ion-icon>
+
+      <div>
+        <strong>No se pudieron cargar los registros</strong>
+        <p>{{ errorCarga }}</p>
+      </div>
+
+      <ion-button
+        fill="clear"
+        (click)="cargarComuniones()">
+        Reintentar
+      </ion-button>
+
+    </div>
+
+    <!-- CARGANDO -->
+    <div class="estado-cargando" *ngIf="cargando">
+
+      <ion-spinner name="crescent"></ion-spinner>
+
+      <p>Cargando registros de Primera Comunión...</p>
+
+    </div>
+
+    <!-- TABLA DE REGISTROS -->
+    <section
+      class="panel-tabla"
+      *ngIf="!cargando && !errorCarga">
+
+      <div class="panel-tabla-encabezado">
+
+        <div>
+          <h2>Registros parroquiales</h2>
+          <p>Listado de personas que recibieron la Primera Comunión.</p>
+        </div>
+
+        <span class="contador-registros">
+          {{ comuniones.length }} registros
+        </span>
+
+      </div>
+
+      <!-- TABLA -->
+      <div class="tabla-contenedor" *ngIf="comuniones.length > 0">
+
+        <table class="tabla-registros">
+
+          <thead>
+            <tr>
+              <th>N.º</th>
+              <th>Cédula</th>
+              <th>Nombres y apellidos</th>
+              <th>Fecha de comunión</th>
+              <th>Lugar</th>
+              <th class="columna-acciones">Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let comunion of comuniones">
+
+              <td>
+                <span class="numero-registro">
+                  {{ comunion.numero_comunion || '—' }}
+                </span>
+              </td>
+
+              <td>
+                {{ comunion.cedula || '—' }}
+              </td>
+
+              <td>
+                <div class="persona-tabla">
+                  <div class="avatar-persona">
+                    <ion-icon name="person-outline"></ion-icon>
+                  </div>
+
+                  <div class="persona-datos">
+                    <strong>
+                      {{ comunion.nombres }} {{ comunion.apellidos }}
+                    </strong>
+                    <span>
+                      Registro sacramental
+                    </span>
+                  </div>
+                </div>
+              </td>
+
+              <td>
+                {{ formatearFecha(comunion.fecha_comunion) || '—' }}
+              </td>
+
+              <td>
+                {{ comunion.lugar_comunion || '—' }}
+              </td>
+
+              <td class="columna-acciones">
+
+                <ion-button
+                  class="btn-consultar"
+                  fill="clear"
+                  size="small"
+                  (click)="consultarComunion(comunion)">
+                  <ion-icon
+                    name="eye-outline"
+                    slot="start">
+                  </ion-icon>
+                  Consultar
+                </ion-button>
+
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <!-- SIN REGISTROS -->
+      <div class="sin-registros" *ngIf="comuniones.length === 0">
+
+        <div class="sin-registros-icono">
+          <ion-icon name="document-text-outline"></ion-icon>
+        </div>
+
+        <h3>No hay registros disponibles</h3>
+
+        <p>
+          No se encontraron registros de Primera Comunión
+          con los criterios de búsqueda ingresados.
+        </p>
+
+        <ion-button
+          fill="outline"
+          (click)="limpiarBusqueda()"
+          *ngIf="busqueda">
+          Limpiar búsqueda
+        </ion-button>
+
+      </div>
+
+    </section>
+
+    <!-- DETALLE DEL REGISTRO -->
+    <section
+      class="panel-detalle"
+      *ngIf="comunionSeleccionada">
+
+      <!-- CABECERA DEL DETALLE -->
+      <div class="detalle-encabezado">
+
+        <div class="detalle-titulo">
+
+          <div class="detalle-icono">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+
+          <div>
+            <span class="subtitulo">INFORMACIÓN SACRAMENTAL</span>
+            <h2>Detalle de Primera Comunión</h2>
+            <p>
+              Consulta completa del registro seleccionado.
+            </p>
+          </div>
+
+        </div>
+
+        <ion-button
+          fill="clear"
+          class="btn-cerrar"
+          (click)="cerrarConsulta()">
+          <ion-icon name="close-outline" slot="start"></ion-icon>
+          Cerrar
+        </ion-button>
+
+      </div>
+
+      <!-- INFORMACIÓN DEL SACRAMENTO -->
+      <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+          <ion-icon name="book-outline"></ion-icon>
+          <h3>Datos del sacramento</h3>
+        </div>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Número de registro</span>
+            <strong>
+              {{ comunionSeleccionada.numero_comunion || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Fecha de Primera Comunión</span>
+            <strong>
+              {{ formatearFecha(comunionSeleccionada.fecha_comunion) || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Lugar de celebración</span>
+            <strong>
+              {{ comunionSeleccionada.lugar_comunion || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Ministro</span>
+            <strong>
+              {{ comunionSeleccionada.ministro || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Tomo</span>
+            <strong>
+              {{ comunionSeleccionada.tomo_comunion || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Página</span>
+            <strong>
+              {{ comunionSeleccionada.pagina_comunion || '—' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- DATOS PERSONALES -->
+      <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+          <ion-icon name="person-outline"></ion-icon>
+          <h3>Datos personales</h3>
+        </div>
+
+        <div class="detalle-grid">
+
+          <div class="dato dato-completo">
+            <span>Nombres y apellidos</span>
+            <strong class="nombre-destacado">
+              {{ comunionSeleccionada.nombres }}
+              {{ comunionSeleccionada.apellidos }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Cédula de identidad</span>
+            <strong>
+              {{ comunionSeleccionada.cedula || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Lugar de nacimiento</span>
+            <strong>
+              {{ comunionSeleccionada.lugar_nacimiento || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Fecha de nacimiento</span>
+            <strong>
+              {{ formatearFecha(comunionSeleccionada.fecha_nacimiento) || '—' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- PADRES Y PADRINOS -->
+      <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+          <ion-icon name="people-outline"></ion-icon>
+          <h3>Padres y padrinos</h3>
+        </div>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Nombre del padre</span>
+            <strong>
+              {{ comunionSeleccionada.nombre_padre || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Nombre de la madre</span>
+            <strong>
+              {{ comunionSeleccionada.nombre_madre || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Padrino de Primera Comunión</span>
+            <strong>
+              {{ comunionSeleccionada.padrino || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Madrina de Primera Comunión</span>
+            <strong>
+              {{ comunionSeleccionada.madrina || '—' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- DATOS DEL BAUTISMO -->
+      <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+          <ion-icon name="water-outline"></ion-icon>
+          <h3>Datos del bautismo</h3>
+        </div>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Parroquia o iglesia donde fue bautizado(a)</span>
+            <strong>
+              {{ comunionSeleccionada.parroquia_bautismo || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Fecha de bautismo</span>
+            <strong>
+              {{ formatearFecha(comunionSeleccionada.fecha_bautismo) || '—' }}
+            </strong>
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- FIRMA PARROQUIAL -->
+      <div class="seccion-detalle">
+
+        <div class="seccion-titulo">
+          <ion-icon name="create-outline"></ion-icon>
+          <h3>Datos de la firma parroquial</h3>
+        </div>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Párroco registrado</span>
+            <strong>
+              {{ comunionSeleccionada.parroco_nombre || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato">
+            <span>Cargo o pie de firma</span>
+            <strong>
+              {{ comunionSeleccionada.pie_firma || '—' }}
+            </strong>
+          </div>
+
+          <div class="dato dato-completo">
+            <span>Firma histórica</span>
+
+            <div class="firma-detalle">
+
+              <img
+                *ngIf="comunionSeleccionada.parroco_firma_data"
+                [src]="obtenerImagen(
+                  comunionSeleccionada.parroco_firma_data,
+                  comunionSeleccionada.parroco_firma_tipo
+                )"
+                alt="Firma histórica del párroco">
+
+              <span *ngIf="!comunionSeleccionada.parroco_firma_data">
+                No se registró una imagen de firma.
+              </span>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ACCIONES -->
+      <div class="acciones-documento">
+
+        <div class="acciones-texto">
+          <h3>Certificado de Primera Comunión</h3>
+          <p>
+            Genera el certificado correspondiente a este registro.
+          </p>
+        </div>
+
+        <div class="acciones-botones">
+
+          <ion-button
+            class="btn-imprimir"
+            (click)="imprimirRegistro()">
+            <ion-icon name="print-outline" slot="start"></ion-icon>
+            Imprimir
+          </ion-button>
+
+          <ion-button
+            class="btn-pdf"
+            (click)="guardarPdf()">
+            <ion-icon name="download-outline" slot="start"></ion-icon>
+            Guardar PDF
+          </ion-button>
+
+          <ion-button
+            class="btn-whatsapp"
+            (click)="enviarPorWhatsApp()">
+            <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+            WhatsApp
+          </ion-button>
+
+        </div>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</ion-content>

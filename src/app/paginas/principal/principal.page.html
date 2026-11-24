@@ -1,0 +1,150 @@
+
+<ion-content [fullscreen]="true">
+  <div class="dashboard">
+
+    <!-- ENCABEZADO -->
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+        <div class="brand-info">
+          <h1>IGLESIA</h1>
+          <span>Administración Parroquial</span>
+        </div>
+      </div>
+
+      <div class="user-area">
+        <div class="user-info">
+          <strong>Administrador</strong>
+          <span>Administrador del sistema</span>
+        </div>
+        <div class="avatar">
+          <ion-icon name="person-outline"></ion-icon>
+        </div>
+      </div>
+    </header>
+
+    <!-- BIENVENIDA -->
+    <section class="welcome">
+      <div>
+        <span class="eyebrow">PANEL DE ADMINISTRACIÓN</span>
+        <h2>Bienvenido al sistema</h2>
+        <p>
+          Administra los servicios, sacramentos y actividades
+          de nuestra comunidad parroquial.
+        </p>
+      </div>
+
+      <div class="welcome-decoration">
+        <ion-icon name="business-outline"></ion-icon>
+      </div>
+    </section>
+
+    <!-- TITULO DE MODULOS -->
+    <section class="section-heading">
+      <div>
+        <h3>Módulos principales</h3>
+        <p>Selecciona el área que deseas administrar.</p>
+      </div>
+      <span class="module-count">05 MÓDULOS</span>
+    </section>
+
+    <!-- MODULOS -->
+    <section class="modules">
+
+      <button class="module-card sacramentos"
+        (click)="abrirModulo('Sacramentos')">
+        <div class="card-top">
+          <div class="module-icon">
+            <ion-icon name="book-outline"></ion-icon>
+          </div>
+          <ion-icon name="arrow-forward-outline"
+            class="arrow"></ion-icon>
+        </div>
+        <h4>Sacramentos</h4>
+        <p>
+          Registro y administración de bautismos,
+          primeras comuniones, confirmaciones y matrimonios.
+        </p>
+        <span class="card-footer">GESTIÓN SACRAMENTAL</span>
+      </button>
+
+      <button class="module-card certificados"
+        (click)="abrirModulo('Certificados')">
+        <div class="card-top">
+          <div class="module-icon">
+            <ion-icon name="document-text-outline"></ion-icon>
+          </div>
+          <ion-icon name="arrow-forward-outline"
+            class="arrow"></ion-icon>
+        </div>
+        <h4>Certificados</h4>
+        <p>
+          Emisión, consulta e impresión de certificados
+          sacramentales.
+        </p>
+        <span class="card-footer">DOCUMENTACIÓN</span>
+      </button>
+
+      <button class="module-card listados"
+        (click)="abrirModulo('Listados')">
+        <div class="card-top">
+          <div class="module-icon">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+          <ion-icon name="arrow-forward-outline"
+            class="arrow"></ion-icon>
+        </div>
+        <h4>Listados</h4>
+        <p>
+          Consulta de registros, búsqueda de personas
+          y reportes parroquiales.
+        </p>
+        <span class="card-footer">CONSULTAS Y REPORTES</span>
+      </button>
+
+      <button class="module-card recibos"
+        (click)="abrirModulo('Recibos')">
+        <div class="card-top">
+          <div class="module-icon">
+            <ion-icon name="receipt-outline"></ion-icon>
+          </div>
+          <ion-icon name="arrow-forward-outline"
+            class="arrow"></ion-icon>
+        </div>
+        <h4>Recibos</h4>
+        <p>
+          Registro de pagos, emisión de comprobantes
+          y control de movimientos.
+        </p>
+        <span class="card-footer">GESTIÓN ECONÓMICA</span>
+      </button>
+
+      <button class="module-card mantenimiento"
+        (click)="abrirModulo('Mantenimiento')">
+        <div class="card-top">
+          <div class="module-icon">
+            <ion-icon name="settings-outline"></ion-icon>
+          </div>
+          <ion-icon name="arrow-forward-outline"
+            class="arrow"></ion-icon>
+        </div>
+        <h4>Mantenimiento</h4>
+        <p>
+          Administración de usuarios, configuración
+          y mantenimiento del sistema.
+        </p>
+        <span class="card-footer">CONFIGURACIÓN DEL SISTEMA</span>
+      </button>
+
+    </section>
+
+    <!-- PIE -->
+    <footer class="dashboard-footer">
+      <span>IGLESIA © 2026</span>
+      <span>Sistema de Administración Parroquial</span>
+    </footer>
+
+  </div>
+</ion-content>

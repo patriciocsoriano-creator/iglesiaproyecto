@@ -1,0 +1,126 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-matrimonio">
+    <ion-buttons slot="start">
+      <ion-back-button
+        defaultHref="/home"
+        text=""
+        icon="arrow-back-outline">
+      </ion-back-button>
+    </ion-buttons>
+
+    <ion-title>Registro de Matrimonios</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido-matrimonio">
+
+  <div class="contenedor-principal">
+
+    <!-- ENCABEZADO -->
+    <div class="encabezado">
+
+      <div class="icono-principal">
+        <ion-icon name="heart-outline"></ion-icon>
+      </div>
+
+      <div class="texto-encabezado">
+        <span class="subtitulo">GESTIÓN SACRAMENTAL</span>
+        <h1>Matrimonio</h1>
+        <p>
+          Administración de los registros matrimoniales
+          de nuestra comunidad parroquial.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- INFORMACIÓN -->
+    <div class="mensaje-informativo">
+      <div class="mensaje-icono">
+        <ion-icon name="information-circle-outline"></ion-icon>
+      </div>
+
+      <div>
+        <h3>Administración de matrimonios</h3>
+        <p>
+          Desde este módulo podrá registrar nuevos matrimonios,
+          consultar los registros existentes y gestionar
+          la información sacramental.
+        </p>
+      </div>
+    </div>
+
+    <!-- OPCIONES -->
+    <div class="titulo-seccion">
+      <h2>Opciones disponibles</h2>
+      <span>Seleccione una opción para continuar</span>
+    </div>
+
+    <div class="opciones-grid">
+
+      <!-- REGISTRAR -->
+      <ion-card
+        class="opcion-card"
+        button="true"
+        (click)="irRegistro()">
+
+        <div class="card-icono icono-registro">
+          <ion-icon name="create-outline"></ion-icon>
+        </div>
+
+        <ion-card-content>
+          <h3>Registrar matrimonio</h3>
+
+          <p>
+            Ingresar los datos de los contrayentes,
+            información sacramental y detalles
+            de la celebración matrimonial.
+          </p>
+
+          <div class="card-accion">
+            <span>Nuevo registro</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </div>
+        </ion-card-content>
+
+      </ion-card>
+
+      <!-- LISTADO -->
+      <ion-card
+        class="opcion-card"
+        button="true"
+        (click)="irListado()">
+
+        <div class="card-icono icono-listado">
+          <ion-icon name="documents-outline"></ion-icon>
+        </div>
+
+        <ion-card-content>
+          <h3>Listado de matrimonios</h3>
+
+          <p>
+            Consultar los matrimonios registrados,
+            revisar sus datos, actualizar información
+            y generar certificados.
+          </p>
+
+          <div class="card-accion">
+            <span>Consultar registros</span>
+            <ion-icon name="arrow-forward-outline"></ion-icon>
+          </div>
+        </ion-card-content>
+
+      </ion-card>
+
+    </div>
+
+    <!-- PIE -->
+    <div class="pie-modulo">
+      <ion-icon name="church-outline"></ion-icon>
+      <span>Parroquia San Rafael Arcángel de Muey</span>
+    </div>
+
+  </div>
+
+</ion-content>

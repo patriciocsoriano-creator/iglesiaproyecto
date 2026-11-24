@@ -1,37 +1,446 @@
+
 /*
  * App Global CSS
  * ----------------------------------------------------------------------------
- * Put style rules here that you want to apply globally. These styles are for
- * the entire app and not just one component. Additionally, this file can be
- * used as an entry point to import other CSS/Sass files to be included in the
- * output CSS.
- * For more information on global stylesheets, visit the documentation:
- * https://ionicframework.com/docs/layout/global-stylesheets
+ * Estilos globales de IGLESIA
+ * Compatible con iOS, Android, tablets y escritorio.
  */
 
-/* Core CSS required for Ionic components to work properly */
-@import "@ionic/angular/css/core.css";
+/* ==========================================
+   IMPORTACIONES DE IONIC
+========================================== */
 
-/* Basic CSS for apps built with Ionic */
+@import "@ionic/angular/css/core.css";
 @import "@ionic/angular/css/normalize.css";
 @import "@ionic/angular/css/structure.css";
 @import "@ionic/angular/css/typography.css";
 @import "@ionic/angular/css/display.css";
 
-/* Optional CSS utils that can be commented out */
 @import "@ionic/angular/css/padding.css";
 @import "@ionic/angular/css/float-elements.css";
 @import "@ionic/angular/css/text-alignment.css";
 @import "@ionic/angular/css/text-transformation.css";
 @import "@ionic/angular/css/flex-utils.css";
 
-/**
- * Ionic Dark Mode
- * -----------------------------------------------------
- * For more info, please see:
- * https://ionicframework.com/docs/theming/dark-mode
+@import "@ionic/angular/css/palettes/dark.system.css";
+
+/* ==========================================
+   CONFIGURACIÓN GLOBAL
+========================================== */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+ion-app {
+  width: 100%;
+  min-height: 100%;
+  overflow-x: hidden;
+}
+
+/* Evitar desbordamientos horizontales */
+ion-content {
+  --background: #f5f7fa;
+}
+
+/* Imágenes adaptables */
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ==========================================
+   ÁREAS SEGURAS - IPHONE
+========================================== */
+
+/*
+ * Respeta el notch, Dynamic Island y la zona
+ * inferior de los dispositivos iPhone.
  */
 
-/* @import "@ionic/angular/css/palettes/dark.always.css"; */
-/* @import "@ionic/angular/css/palettes/dark.class.css"; */
-@import "@ionic/angular/css/palettes/dark.system.css";
+ion-header {
+  padding-top: env(safe-area-inset-top, 0px);
+}
+
+ion-footer {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+ion-content {
+  --padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ==========================================
+   FORMULARIOS GENERALES
+========================================== */
+
+input,
+textarea,
+select,
+button {
+  font-family: inherit;
+  max-width: 100%;
+}
+
+ion-input,
+ion-textarea,
+ion-select,
+ion-datetime {
+  max-width: 100%;
+}
+
+/* ==========================================
+   TABLAS GENERALES
+========================================== */
+
+table {
+  max-width: 100%;
+  border-collapse: collapse;
+}
+
+/*
+ * Contenedores habituales de tablas.
+ * Permiten desplazamiento horizontal en móviles.
+ */
+
+.tabla-contenedor,
+.contenedor-tabla,
+.table-container,
+.tabla-responsive {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.tabla-contenedor table,
+.contenedor-tabla table,
+.table-container table,
+.tabla-responsive table {
+  min-width: 600px;
+}
+
+/* ==========================================
+   VENTANA DE SELECCIÓN DE LUGAR DE BAUTIZO
+========================================== */
+
+ion-alert.alerta-lugar-bautizo {
+
+  --backdrop-opacity: 0.55;
+
+  .alert-wrapper {
+    width: 90%;
+    max-width: 460px;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 15px 45px rgba(15, 35, 60, 0.22);
+  }
+
+  .alert-head {
+    padding: 24px 22px 15px;
+    background: #17365d;
+  }
+
+  .alert-title {
+    color: #ffffff;
+    font-size: 19px;
+    font-weight: 700;
+  }
+
+  .alert-message {
+    color: #dce6f2;
+    font-size: 13px;
+  }
+
+  .alert-radio-group {
+    padding: 10px 14px;
+    border: 0;
+    max-height: 320px;
+  }
+
+  .alert-radio-label {
+    color: #263b57 !important;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: normal;
+    padding-top: 15px;
+    padding-bottom: 15px;
+  }
+
+  .alert-radio-icon {
+    border-color: #9aaabe;
+  }
+
+  .alert-radio-inner {
+    background: #17365d;
+  }
+
+  .alert-radio-button[aria-checked="true"] {
+    background: #edf3fa;
+
+    .alert-radio-label {
+      color: #17365d !important;
+      font-weight: 700;
+    }
+
+    .alert-radio-icon {
+      border-color: #17365d;
+    }
+  }
+
+  .alert-button-group {
+    padding: 12px 16px 16px;
+  }
+
+  .alert-button {
+    min-height: 42px;
+    border-radius: 8px;
+    color: #17365d;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: none;
+  }
+
+  .alert-button:last-child {
+    background: #17365d;
+    color: #ffffff;
+  }
+}
+
+/* ==========================================
+   VENTANA DE SELECCIÓN DEL LUGAR DE MATRIMONIO
+========================================== */
+
+ion-alert.alerta-lugar-matrimonio {
+  --backdrop-opacity: 0.45;
+
+  .alert-wrapper {
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.15);
+  }
+
+  .alert-head {
+    padding: 22px 20px 12px;
+  }
+
+  .alert-title {
+    color: #263449;
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  .alert-sub-title {
+    color: #7b8493;
+    font-size: 13px;
+  }
+
+  .alert-radio-label {
+    color: #344054;
+    font-size: 14px;
+  }
+
+  .alert-radio-inner {
+    border-color: #64748b;
+  }
+
+  .alert-radio-group {
+    border-top: 1px solid #edf0f4;
+    border-bottom: 1px solid #edf0f4;
+  }
+
+  .alert-button {
+    color: #344f75;
+    font-weight: 700;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE GENERAL - TABLETS
+========================================== */
+
+@media (max-width: 1024px) {
+
+  ion-content {
+    --padding-start: 14px;
+    --padding-end: 14px;
+  }
+
+  img {
+    object-fit: contain;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE GENERAL - CELULARES
+   IPHONE Y ANDROID
+========================================== */
+
+@media (max-width: 768px) {
+
+  html,
+  body,
+  ion-app {
+    width: 100%;
+    overflow-x: hidden;
+  }
+
+  ion-content {
+    --padding-start: 12px;
+    --padding-end: 12px;
+    --padding-bottom: env(safe-area-inset-bottom, 12px);
+  }
+
+  ion-title {
+    font-size: 17px;
+    font-weight: 600;
+  }
+
+  ion-toolbar {
+    --min-height: 52px;
+  }
+
+  ion-button {
+    --min-height: 42px;
+    font-size: 13px;
+  }
+
+  /* Formularios */
+  input,
+  textarea,
+  select {
+    font-size: 16px;
+  }
+
+  ion-input,
+  ion-textarea,
+  ion-select {
+    font-size: 14px;
+  }
+
+  /* Cuadrículas de formularios */
+  .formulario-grid,
+  .form-grid,
+  .grid-formulario {
+    grid-template-columns: minmax(0, 1fr) !important;
+  }
+
+  /* Tarjetas */
+  .tarjeta,
+  .tarjeta-detalle,
+  .tarjeta-edicion,
+  .card-contenedor {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  /* Tablas */
+  .tabla-contenedor,
+  .contenedor-tabla,
+  .table-container,
+  .tabla-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Acciones y botones */
+  .detalle-acciones,
+  .acciones-edicion,
+  .acciones-formulario {
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  /* Evitar que textos largos rompan el diseño */
+  h1,
+  h2,
+  h3,
+  p,
+  span,
+  label {
+    overflow-wrap: anywhere;
+  }
+
+  /* Imágenes */
+  img {
+    max-width: 100%;
+  }
+
+  /* Alertas */
+  ion-alert .alert-wrapper {
+    width: calc(100% - 32px);
+    max-width: 460px;
+    border-radius: 16px;
+  }
+
+  ion-alert .alert-title {
+    font-size: 17px;
+  }
+}
+
+/* ==========================================
+   RESPONSIVE - CELULARES PEQUEÑOS
+========================================== */
+
+@media (max-width: 390px) {
+
+  ion-content {
+    --padding-start: 9px;
+    --padding-end: 9px;
+  }
+
+  ion-title {
+    font-size: 15px;
+  }
+
+  ion-button {
+    font-size: 12px;
+  }
+
+  .tarjeta,
+  .tarjeta-detalle,
+  .tarjeta-edicion {
+    padding: 12px;
+  }
+
+  ion-alert.alerta-lugar-bautizo {
+
+    .alert-wrapper {
+      width: 94%;
+    }
+
+    .alert-head {
+      padding: 18px 16px 12px;
+    }
+
+    .alert-title {
+      font-size: 17px;
+    }
+  }
+}
+
+/* ==========================================
+   PANTALLAS HORIZONTALES
+========================================== */
+
+@media (max-height: 500px) and (orientation: landscape) {
+
+  ion-content {
+    --padding-top: 8px;
+    --padding-bottom: 8px;
+  }
+
+  ion-modal {
+    --height: 95%;
+  }
+}

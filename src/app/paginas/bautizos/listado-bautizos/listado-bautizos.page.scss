@@ -1,0 +1,721 @@
+:host {
+  display: block;
+  --color-principal: #17365d;
+  --color-secundario: #c49a45;
+}
+
+.toolbar-listado {
+  --background: #17365d;
+  --color: #ffffff;
+  --min-height: 64px;
+}
+
+.contenido-listado {
+  --background: #f4f6fa;
+}
+
+.contenedor {
+  width: min(1200px, 95%);
+  margin: 28px auto 45px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 25px;
+
+  h1 {
+    margin: 0 0 7px;
+    color: #17365d;
+    font-size: 25px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 0;
+    color: #7d8ba0;
+    font-size: 14px;
+  }
+}
+
+.icono-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 58px;
+  height: 58px;
+  flex-shrink: 0;
+  border-radius: 16px;
+  background: #e6edf7;
+  color: #17365d;
+
+  ion-icon {
+    font-size: 29px;
+  }
+}
+
+.resumen {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  width: fit-content;
+  min-width: 245px;
+  padding: 17px 22px;
+  margin-bottom: 20px;
+  border: 1px solid #e4eaf2;
+  border-radius: 13px;
+  background: #ffffff;
+  box-shadow: 0 3px 12px rgba(27, 47, 75, 0.035);
+
+  .resumen-icono {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 43px;
+    height: 43px;
+    border-radius: 12px;
+    background: #edf2f8;
+    color: #24466e;
+
+    ion-icon {
+      font-size: 22px;
+    }
+  }
+
+  div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  span {
+    color: #7c899b;
+    font-size: 12px;
+  }
+
+  strong {
+    color: #17365d;
+    font-size: 24px;
+    font-weight: 750;
+  }
+}
+
+.tarjeta-busqueda,
+.tarjeta-listado,
+.tarjeta-detalle {
+  padding: 23px;
+  margin-bottom: 20px;
+  border: 1px solid #e5eaf1;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(27, 47, 75, 0.045);
+}
+
+.tarjeta-busqueda {
+  h2 {
+    margin: 0 0 5px;
+    color: #203b5e;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0 0 13px;
+    color: #8290a3;
+    font-size: 13px;
+  }
+
+  ion-searchbar {
+    --background: #f5f7fa;
+    --color: #263b57;
+    --placeholder-color: #8c98a9;
+    --icon-color: #58708e;
+    --clear-button-color: #58708e;
+    --border-radius: 10px;
+    padding: 0;
+  }
+}
+
+.encabezado-listado {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 13px;
+
+  h2 {
+    margin: 0 0 5px;
+    color: #203b5e;
+    font-size: 18px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 0;
+    color: #8290a3;
+    font-size: 13px;
+  }
+}
+
+.contador {
+  padding: 8px 12px;
+  border-radius: 20px;
+  background: #edf2f8;
+  color: #24466e;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.tabla-contenedor {
+  width: 100%;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  min-width: 850px;
+  border-collapse: collapse;
+  text-align: left;
+
+  thead {
+    background: #f4f6fa;
+  }
+
+  th {
+    padding: 15px 12px;
+    color: #62738a;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  td {
+    padding: 15px 12px;
+    border-bottom: 1px solid #edf0f5;
+    color: #40516a;
+    font-size: 13px;
+    vertical-align: middle;
+  }
+
+  tbody tr:hover {
+    background: #f9fbfd;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+}
+
+.numero-registro {
+  color: #17365d;
+  font-weight: 750;
+}
+
+.id-registro {
+  color: #8a96a7;
+  font-size: 12px;
+}
+
+.persona {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  .avatar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background: #edf2f8;
+    color: #24466e;
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+
+  div:last-child {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  strong {
+    color: #263b57;
+    font-size: 13px;
+  }
+
+  span {
+    color: #77869a;
+    font-size: 12px;
+  }
+}
+
+.boton-ver {
+  --color: #24466e;
+  --border-color: #b8c5d5;
+  --border-radius: 8px;
+  font-size: 12px;
+  text-transform: none;
+}
+
+.estado-cargando {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 45px;
+  color: #64748b;
+
+  ion-spinner {
+    color: #17365d;
+  }
+
+  p {
+    margin: 0;
+    font-size: 13px;
+  }
+}
+
+.mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  margin-bottom: 18px;
+  border: 1px solid #f0c9c9;
+  border-radius: 9px;
+  background: #fff3f3;
+  color: #a33d3d;
+  font-size: 13px;
+}
+
+.sin-registros {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 45px 15px;
+  text-align: center;
+
+  h3 {
+    margin: 15px 0 7px;
+    color: #344b68;
+    font-size: 17px;
+  }
+
+  p {
+    margin: 0;
+    color: #8491a2;
+    font-size: 13px;
+  }
+}
+
+.icono-vacio {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  height: 65px;
+  border-radius: 18px;
+  background: #edf2f8;
+  color: #6d819b;
+
+  ion-icon {
+    font-size: 31px;
+  }
+}
+
+/* DETALLE DEL BAUTISMO */
+
+.tarjeta-detalle {
+  border-top: 4px solid #c49a45;
+}
+
+.detalle-encabezado {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 15px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9edf3;
+
+  h2 {
+    margin: 7px 0;
+    color: #17365d;
+    font-size: 22px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 0;
+    color: #77869a;
+    font-size: 13px;
+  }
+}
+
+.etiqueta-detalle {
+  color: #b28b40;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 1.2px;
+}
+
+.detalle-seccion {
+  padding: 22px 0;
+  border-bottom: 1px solid #edf0f5;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 17px;
+    color: #203b5e;
+    font-size: 16px;
+    font-weight: 700;
+
+    ion-icon {
+      color: #b28b40;
+      font-size: 20px;
+    }
+  }
+}
+
+.detalle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 17px 25px;
+}
+
+.dato {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+
+  span {
+    color: #8491a2;
+    font-size: 12px;
+  }
+
+  strong {
+    color: #344b68;
+    font-size: 13px;
+    font-weight: 650;
+    overflow-wrap: anywhere;
+  }
+}
+
+.nota-marginal {
+  padding: 14px;
+  border-radius: 9px;
+  background: #f5f7fa;
+  color: #52647c;
+  font-size: 13px;
+  line-height: 1.6;
+  white-space: pre-wrap;
+}
+
+.firma-detalle {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  text-align: center;
+
+  h3 {
+    align-self: flex-start;
+    width: 100%;
+  }
+
+  strong {
+    margin-top: 9px;
+    color: #263b57;
+    font-size: 14px;
+  }
+
+  span {
+    margin-top: 4px;
+    color: #64748b;
+    font-size: 12px;
+  }
+
+  p {
+    color: #8793a3;
+    font-size: 11px;
+  }
+}
+
+.firma-imagen {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90px;
+  width: 100%;
+
+  img {
+    max-width: 230px;
+    max-height: 85px;
+    object-fit: contain;
+  }
+}
+
+.sin-firma {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 90px;
+  color: #8995a5;
+  font-size: 12px;
+}
+
+.linea-firma {
+  width: 260px;
+  max-width: 90%;
+  border-top: 1px solid #66758a;
+}
+
+
+.detalle-acciones {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 20px;
+
+  ion-button {
+    --border-radius: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+    margin: 0;
+  }
+
+  .boton-imprimir {
+    --background: #17365d;
+    --color: #ffffff;
+    --background-hover: #244b78;
+  }
+
+  .boton-whatsapp {
+    --background: #218c55;
+    --color: #ffffff;
+    --background-hover: #176d41;
+  }
+
+  .boton-cerrar {
+    --color: #52647c;
+    --border-color: #b8c5d5;
+  }
+}
+
+
+@media (max-width: 650px) {
+
+  .contenedor {
+    width: 94%;
+    margin-top: 20px;
+  }
+
+  .encabezado h1 {
+    font-size: 21px;
+  }
+
+  .tarjeta-busqueda,
+  .tarjeta-listado,
+  .tarjeta-detalle {
+    padding: 17px 13px;
+  }
+
+  .resumen {
+    width: 100%;
+  }
+
+  .detalle-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .detalle-encabezado {
+    flex-direction: column;
+  }
+
+  .encabezado-listado {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+
+@media (max-width: 650px) {
+  .detalle-acciones {
+    flex-direction: column;
+    align-items: stretch;
+
+    ion-button {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+/* =====================================================
+   FORMULARIO DE EDICIÓN DE BAUTIZOS
+===================================================== */
+
+.tarjeta-edicion {
+  padding: 25px;
+  margin-bottom: 20px;
+  border: 1px solid #e5eaf1;
+  border-top: 4px solid #c49a45;
+  border-radius: 15px;
+  background: #ffffff;
+  box-shadow: 0 4px 16px rgba(27, 47, 75, 0.045);
+}
+
+.edicion-encabezado {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 15px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #e9edf3;
+
+  h2 {
+    margin: 7px 0;
+    color: #17365d;
+    font-size: 22px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 0;
+    color: #77869a;
+    font-size: 13px;
+  }
+}
+
+.formulario-seccion {
+  padding: 22px 0;
+  border-bottom: 1px solid #edf0f5;
+
+  h3 {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    margin: 0 0 17px;
+    color: #203b5e;
+    font-size: 16px;
+    font-weight: 700;
+
+    ion-icon {
+      color: #b28b40;
+      font-size: 20px;
+    }
+  }
+
+  ion-item {
+    --background: #f8f9fb;
+    --border-color: #e3e8ef;
+    --border-radius: 9px;
+    --color: #344b68;
+    --padding-start: 12px;
+    --inner-padding-end: 12px;
+    margin-bottom: 10px;
+    border: 1px solid #e3e8ef;
+    border-radius: 9px;
+
+    ion-label {
+      color: #718198;
+      font-size: 12px;
+    }
+
+    ion-input,
+    ion-textarea {
+      --color: #263b57;
+      font-size: 14px;
+    }
+  }
+}
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px 15px;
+}
+
+.aviso-firma {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px;
+  margin-top: 20px;
+  border: 1px solid #dce8df;
+  border-radius: 9px;
+  background: #f4faf5;
+  color: #426c4c;
+  font-size: 12px;
+  line-height: 1.5;
+
+  ion-icon {
+    flex-shrink: 0;
+    font-size: 19px;
+  }
+}
+
+.acciones-edicion {
+  display: flex;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 10px;
+  padding-top: 22px;
+
+  ion-button {
+    --border-radius: 9px;
+    margin: 0;
+    font-size: 13px;
+    font-weight: 600;
+    text-transform: none;
+  }
+
+  .boton-guardar-edicion {
+    --background: #17365d;
+    --color: #ffffff;
+  }
+
+  .boton-cancelar-edicion {
+    --color: #52647c;
+    --border-color: #b8c5d5;
+  }
+}
+
+.detalle-acciones {
+  .boton-modificar {
+    --color: #17365d;
+    --border-color: #c49a45;
+  }
+}
+
+@media (max-width: 650px) {
+
+  .tarjeta-edicion {
+    padding: 17px 13px;
+  }
+
+  .formulario-grid {
+    grid-template-columns: 1fr;
+    gap: 5px;
+  }
+
+  .acciones-edicion {
+    flex-direction: column;
+    align-items: stretch;
+
+    ion-button {
+      width: 100%;
+    }
+  }
+}

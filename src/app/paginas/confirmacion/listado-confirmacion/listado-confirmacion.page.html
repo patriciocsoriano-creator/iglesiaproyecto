@@ -1,0 +1,486 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-listado">
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Listado de Confirmaciones</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button (click)="cargarConfirmaciones()" [disabled]="cargando">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="pagina-listado">
+
+  <div class="contenedor-principal">
+
+    <div class="encabezado-pagina">
+      <div>
+        <span class="subtitulo">GESTIÓN SACRAMENTAL</span>
+        <h1>Confirmaciones</h1>
+        <p>Consulta y administra los registros de confirmación.</p>
+      </div>
+
+      <div class="contador-registros">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <div>
+          <strong>{{ confirmaciones.length }}</strong>
+          <span>Registros</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-busqueda">
+      <ion-searchbar
+        [(ngModel)]="busqueda"
+        placeholder="Buscar por número, cédula, nombres o apellidos"
+        debounce="350"
+        (ionInput)="cargarConfirmaciones()"
+        animated="true">
+      </ion-searchbar>
+    </div>
+
+    <div class="mensaje-error" *ngIf="errorCarga">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      {{ errorCarga }}
+    </div>
+
+    <div class="estado-carga" *ngIf="cargando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Cargando confirmaciones...</span>
+    </div>
+
+    <div class="tabla-contenedor" *ngIf="!cargando">
+
+      <div class="tabla-scroll" *ngIf="confirmaciones.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>N.º</th>
+              <th>Cédula</th>
+              <th>Nombres y apellidos</th>
+              <th>Fecha</th>
+              <th>Lugar</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr
+              *ngFor="let confirmacion of confirmaciones"
+              [class.fila-seleccionada]="
+                confirmacionSeleccionada?.id === confirmacion.id
+              ">
+
+              <td class="numero-registro">
+                {{ confirmacion.numero_confirmacion }}
+              </td>
+
+              <td>{{ confirmacion.cedula || '—' }}</td>
+
+              <td>
+                <strong>
+                  {{ confirmacion.nombres }}
+                  {{ confirmacion.apellidos }}
+                </strong>
+              </td>
+
+              <td>{{ formatearFecha(confirmacion.fecha_confirmacion) }}</td>
+
+              <td>{{ confirmacion.lugar_confirmacion || '—' }}</td>
+
+              <td>
+                <ion-button
+                  size="small"
+                  fill="outline"
+                  class="btn-consultar"
+                  (click)="consultarConfirmacion(confirmacion)">
+                  <ion-icon
+                    name="eye-outline"
+                    slot="start">
+                  </ion-icon>
+                  Consultar
+                </ion-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="sin-registros" *ngIf="confirmaciones.length === 0">
+        <ion-icon name="documents-outline"></ion-icon>
+        <h3>No hay confirmaciones registradas</h3>
+        <p>No se encontraron registros con los criterios de búsqueda.</p>
+      </div>
+
+    </div>
+
+    <!-- DETALLE DE LA CONFIRMACIÓN -->
+
+    <div class="panel-detalle" *ngIf="confirmacionSeleccionada">
+
+      <div class="detalle-encabezado">
+        <div>
+          <span class="subtitulo">INFORMACIÓN DEL REGISTRO</span>
+          <h2>Detalle de confirmación</h2>
+          <p>
+            Registro N.º
+            <strong>{{ confirmacionSeleccionada.numero_confirmacion }}</strong>
+          </p>
+        </div>
+
+        <div class="acciones-superiores">
+          <ion-button
+            *ngIf="!editando"
+            class="btn-editar"
+            (click)="activarEdicion()">
+            <ion-icon name="create-outline" slot="start"></ion-icon>
+            Editar información
+          </ion-button>
+
+          <ion-button
+            *ngIf="editando"
+            fill="outline"
+            color="medium"
+            (click)="cancelarEdicion()">
+            <ion-icon name="close-outline" slot="start"></ion-icon>
+            Cancelar
+          </ion-button>
+
+          <ion-button
+            *ngIf="editando"
+            class="btn-guardar"
+            [disabled]="guardando"
+            (click)="guardarCambios()">
+            <ion-spinner
+              *ngIf="guardando"
+              name="crescent">
+            </ion-spinner>
+
+            <ion-icon
+              *ngIf="!guardando"
+              name="save-outline"
+              slot="start">
+            </ion-icon>
+
+            {{ guardando ? 'Guardando...' : 'Guardar cambios' }}
+          </ion-button>
+        </div>
+      </div>
+
+      <div class="aviso-edicion" *ngIf="editando">
+        <ion-icon name="information-circle-outline"></ion-icon>
+        Estás editando este registro. Comprueba los datos antes de guardar.
+      </div>
+
+      <div class="estado-carga" *ngIf="cargandoDetalle">
+        <ion-spinner name="crescent"></ion-spinner>
+        Consultando información...
+      </div>
+
+      <div class="contenido-detalle" *ngIf="!cargandoDetalle">
+
+        <!-- DATOS DEL SACRAMENTO -->
+
+        <section class="seccion-detalle">
+          <div class="titulo-seccion">
+            <ion-icon name="book-outline"></ion-icon>
+            <h3>Datos de la confirmación</h3>
+          </div>
+
+          <div class="form-grid">
+
+            <div class="campo">
+              <label>Número de confirmación</label>
+              <ion-input
+                [(ngModel)]="formulario.numero_confirmacion"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Fecha de confirmación</label>
+              <ion-input
+                type="date"
+                [(ngModel)]="formulario.fecha_confirmacion"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Tomo</label>
+              <ion-input
+                [(ngModel)]="formulario.tomo_confirmacion"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Página</label>
+              <ion-input
+                [(ngModel)]="formulario.pagina_confirmacion"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Lugar de confirmación</label>
+              <ion-input
+                [(ngModel)]="formulario.lugar_confirmacion"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Ministro</label>
+              <ion-input
+                [(ngModel)]="formulario.ministro"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- DATOS PERSONALES -->
+
+        <section class="seccion-detalle">
+          <div class="titulo-seccion">
+            <ion-icon name="person-outline"></ion-icon>
+            <h3>Datos personales del confirmado</h3>
+          </div>
+
+          <div class="form-grid">
+
+            <div class="campo">
+              <label>Cédula</label>
+              <ion-input
+                [(ngModel)]="formulario.cedula"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Nombres</label>
+              <ion-input
+                [(ngModel)]="formulario.nombres"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Apellidos</label>
+              <ion-input
+                [(ngModel)]="formulario.apellidos"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Lugar de nacimiento</label>
+              <ion-input
+                [(ngModel)]="formulario.lugar_nacimiento"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Fecha de nacimiento</label>
+              <ion-input
+                type="date"
+                [(ngModel)]="formulario.fecha_nacimiento"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- DATOS DEL BAUTISMO -->
+
+        <section class="seccion-detalle">
+          <div class="titulo-seccion">
+            <ion-icon name="water-outline"></ion-icon>
+            <h3>Datos del bautismo</h3>
+          </div>
+
+          <div class="form-grid">
+
+            <div class="campo">
+              <label>Parroquia donde fue bautizado</label>
+              <ion-input
+                [(ngModel)]="formulario.parroquia_bautismo"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Fecha de bautismo</label>
+              <ion-input
+                type="date"
+                [(ngModel)]="formulario.fecha_bautismo"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- DATOS FAMILIARES -->
+
+        <section class="seccion-detalle">
+          <div class="titulo-seccion">
+            <ion-icon name="people-outline"></ion-icon>
+            <h3>Datos familiares</h3>
+          </div>
+
+          <div class="form-grid">
+
+            <div class="campo">
+              <label>Nombre del padre</label>
+              <ion-input
+                [(ngModel)]="formulario.nombre_padre"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Nombre de la madre</label>
+              <ion-input
+                [(ngModel)]="formulario.nombre_madre"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Nombre del padrino</label>
+              <ion-input
+                [(ngModel)]="formulario.nombre_padrino"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Nombre de la madrina</label>
+              <ion-input
+                [(ngModel)]="formulario.nombre_madrina"
+                [readonly]="!editando">
+              </ion-input>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- FIRMA HISTÓRICA -->
+
+        <section class="seccion-detalle seccion-firma">
+          <div class="titulo-seccion">
+            <ion-icon name="create-outline"></ion-icon>
+            <h3>Datos de la firma parroquial</h3>
+          </div>
+
+          <div class="aviso-firma">
+            <ion-icon name="lock-closed-outline"></ion-icon>
+            Los datos de la firma histórica no se modifican desde este formulario.
+          </div>
+
+          <div class="form-grid">
+
+            <div class="campo">
+              <label>Párroco que registró la confirmación</label>
+              <ion-input
+                [value]="confirmacionSeleccionada.parroco_nombre || 'No registrado'"
+                readonly>
+              </ion-input>
+            </div>
+
+            <div class="campo">
+              <label>Pie de firma</label>
+              <ion-input
+                [value]="confirmacionSeleccionada.pie_firma || 'No registrado'"
+                readonly>
+              </ion-input>
+            </div>
+
+          </div>
+
+          <div
+            class="firma-registrada"
+            *ngIf="confirmacionSeleccionada.parroco_firma_data">
+
+            <span>Firma registrada</span>
+
+            <img
+              [src]="confirmacionSeleccionada.parroco_firma_data"
+              alt="Firma histórica del párroco">
+
+          </div>
+
+          <p
+            class="sin-firma"
+            *ngIf="!confirmacionSeleccionada.parroco_firma_data">
+            Este registro no contiene una imagen de firma.
+          </p>
+
+        </section>
+
+
+<!-- ACCIONES DEL CERTIFICADO -->
+
+<section class="seccion-acciones">
+
+  <div class="titulo-seccion">
+    <ion-icon name="document-text-outline"></ion-icon>
+    <h3>Certificado de Confirmación</h3>
+  </div>
+
+  <p>
+    Genera, imprime o comparte el certificado correspondiente a este registro.
+  </p>
+
+  <div class="botones-documento">
+
+    <ion-button
+      class="btn-imprimir"
+      (click)="imprimirRegistro()">
+      <ion-icon name="print-outline" slot="start"></ion-icon>
+      Imprimir
+    </ion-button>
+
+    <ion-button
+      class="btn-pdf"
+      (click)="guardarPdf()">
+      <ion-icon name="document-outline" slot="start"></ion-icon>
+      Guardar PDF
+    </ion-button>
+
+    <ion-button
+      class="btn-whatsapp"
+      (click)="enviarPorWhatsApp()">
+      <ion-icon name="logo-whatsapp" slot="start"></ion-icon>
+      Compartir por WhatsApp
+    </ion-button>
+
+  </div>
+
+</section>
+
+
+      </div>
+    </div>
+
+    <div class="sin-seleccion" *ngIf="!confirmacionSeleccionada && !cargandoDetalle">
+      <ion-icon name="hand-left-outline"></ion-icon>
+      <h3>Selecciona una confirmación</h3>
+      <p>Consulta un registro para ver todos sus datos y editar su información.</p>
+    </div>
+
+  </div>
+</ion-content>

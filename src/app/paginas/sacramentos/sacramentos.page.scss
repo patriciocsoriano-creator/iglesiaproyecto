@@ -1,0 +1,236 @@
+
+.sacramentos-content {
+  --background: #f4f6fa;
+}
+
+.contenedor {
+  width: 100%;
+  max-width: 1150px;
+  margin: 0 auto;
+  padding: 45px 40px;
+}
+
+.encabezado {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  margin-bottom: 35px;
+}
+
+.icono-principal {
+  width: 85px;
+  height: 85px;
+  border-radius: 20px;
+  background: #172b49;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #d7b66d;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 43px;
+  }
+}
+
+.titulo {
+  .subtitulo {
+    color: #b18b43;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: 2px;
+  }
+
+  h1 {
+    color: #172b49;
+    font-size: 34px;
+    font-weight: 800;
+    margin: 7px 0;
+  }
+
+  p {
+    color: #758195;
+    font-size: 14px;
+    margin: 0;
+  }
+}
+
+.separador {
+  height: 1px;
+  background: #dfe4ec;
+  margin-bottom: 35px;
+}
+
+.seccion-titulo {
+  margin-bottom: 25px;
+
+  h2 {
+    color: #172b49;
+    font-size: 21px;
+    font-weight: 750;
+    margin-bottom: 7px;
+  }
+
+  p {
+    color: #8590a0;
+    font-size: 14px;
+  }
+}
+
+.grid-sacramentos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 22px;
+}
+
+.tarjeta {
+  background: #ffffff;
+  border: 1px solid #e5e9f0;
+  border-radius: 17px;
+  min-height: 145px;
+  padding: 25px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.25s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: #c6a45c;
+    box-shadow: 0 10px 25px rgba(23, 43, 73, 0.09);
+  }
+}
+
+.icono {
+  width: 65px;
+  height: 65px;
+  border-radius: 15px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  ion-icon {
+    font-size: 32px;
+  }
+}
+
+.tarjeta-bautismo {
+  background: #e8f3fc;
+  color: #3981b7;
+}
+
+.tarjeta-comunion {
+  background: #fbf3df;
+  color: #b58b35;
+}
+
+.tarjeta-confirmacion {
+  background: #fbece9;
+  color: #bd6550;
+}
+
+.tarjeta-matrimonio {
+  background: #f4eafa;
+  color: #9561ac;
+}
+
+.informacion {
+  flex: 1;
+
+  h3 {
+    color: #172b49;
+    font-size: 17px;
+    font-weight: 750;
+    margin: 0 0 8px;
+  }
+
+  p {
+    color: #8993a2;
+    font-size: 12px;
+    line-height: 1.5;
+    margin: 0;
+  }
+}
+
+.flecha {
+  color: #aab3c0;
+  font-size: 21px;
+}
+
+.pie {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 45px;
+  padding-top: 25px;
+  border-top: 1px solid #dfe4ec;
+
+  span {
+    font-size: 11px;
+    color: #9aa3b0;
+    letter-spacing: 1px;
+  }
+}
+
+.btn-regresar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #172b49;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  padding: 13px 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover {
+    background: #263f63;
+  }
+
+  ion-icon {
+    font-size: 18px;
+  }
+}
+
+@media (max-width: 700px) {
+  .contenedor {
+    padding: 25px 18px;
+  }
+
+  .encabezado {
+    gap: 15px;
+  }
+
+  .icono-principal {
+    width: 65px;
+    height: 65px;
+
+    ion-icon {
+      font-size: 32px;
+    }
+  }
+
+  .titulo h1 {
+    font-size: 26px;
+  }
+
+  .grid-sacramentos {
+    grid-template-columns: 1fr;
+  }
+
+  .tarjeta {
+    padding: 18px;
+  }
+
+  .pie {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 20px;
+  }
+}

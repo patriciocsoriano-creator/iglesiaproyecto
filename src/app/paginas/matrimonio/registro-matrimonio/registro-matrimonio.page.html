@@ -1,0 +1,675 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-registro">
+
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()" [disabled]="guardando">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Registro de Matrimonio</ion-title>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="pagina-registro">
+
+  <div class="contenedor-formulario">
+
+    <!-- ENCABEZADO -->
+
+    <div class="encabezado-pagina">
+
+      <div class="icono-encabezado">
+        <ion-icon name="heart-outline"></ion-icon>
+      </div>
+
+      <div>
+        <span class="subtitulo">GESTIÓN SACRAMENTAL</span>
+        <h1>Nuevo matrimonio</h1>
+        <p>
+          Complete la información correspondiente a la celebración
+          del sacramento del matrimonio.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- CARGA DEL PÁRROCO -->
+
+    <div class="estado-carga" *ngIf="cargandoParroco">
+
+      <ion-spinner name="crescent"></ion-spinner>
+
+      <span>
+        Consultando configuración parroquial...
+      </span>
+
+    </div>
+
+    <!-- ERROR -->
+
+    <div class="mensaje-error" *ngIf="mensajeError">
+
+      <ion-icon name="alert-circle-outline"></ion-icon>
+
+      <span>{{ mensajeError }}</span>
+
+    </div>
+
+    <ng-container *ngIf="!cargandoParroco">
+
+      <!-- ========================================= -->
+      <!-- 1. DATOS DEL MATRIMONIO -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+  <div class="titulo-seccion">
+    <div class="icono-seccion">
+      <ion-icon name="book-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h2>Datos del matrimonio</h2>
+      <p>Información del registro sacramental.</p>
+    </div>
+  </div>
+
+  <div class="formulario-grid">
+
+    <div class="campo">
+      <ion-label>Número de matrimonio *</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.numero_matrimonio"
+        placeholder="Ej. 001"
+        maxlength="30">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Fecha de matrimonio *</ion-label>
+      <ion-input
+        type="date"
+        [(ngModel)]="matrimonio.fecha_matrimonio">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Tomo</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.tomo_matrimonio"
+        placeholder="Número de tomo"
+        maxlength="30">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Página / Folio</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.pagina_matrimonio"
+        placeholder="Número de página"
+        maxlength="30">
+      </ion-input>
+    </div>
+
+    <div class="campo campo-completo campo-lugar-matrimonio">
+  <ion-label>Lugar de celebración del sacramento *</ion-label>
+
+  <ion-select
+    [(ngModel)]="matrimonio.lugar_matrimonio"
+    interface="alert"
+    [interfaceOptions]="{
+      header: 'Lugar de celebración',
+      subHeader: 'Seleccione el templo o capilla',
+      cssClass: 'alerta-lugar-matrimonio'
+    }"
+    placeholder="Seleccione dónde se celebró el matrimonio"
+    aria-label="Lugar de celebración del matrimonio">
+
+    <ion-select-option
+      *ngFor="let lugar of lugaresCelebracion"
+      [value]="lugar">
+      {{ lugar }}
+    </ion-select-option>
+
+  </ion-select>
+</div>
+
+    <div class="campo campo-completo">
+      <ion-label>Ministro que celebró el matrimonio *</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.ministro"
+        placeholder="Nombres completos del sacerdote"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+  </div>
+</section>
+
+      <!-- ========================================= -->
+      <!-- 2. DATOS DEL ESPOSO -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+  <div class="titulo-seccion">
+    <div class="icono-seccion icono-azul">
+      <ion-icon name="person-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h2>Datos del esposo</h2>
+      <p>Información personal y familiar del contrayente.</p>
+    </div>
+  </div>
+
+  <div class="formulario-grid">
+
+    <div class="campo">
+      <ion-label>Nombres *</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.nombres_esposo"
+        placeholder="Nombres del esposo"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Apellidos *</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.apellidos_esposo"
+        placeholder="Apellidos del esposo"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo campo-completo">
+      <ion-label>Cédula del esposo</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.cedula_esposo"
+        placeholder="Ingrese los 10 dígitos"
+        inputmode="numeric"
+        maxlength="10"
+        (ionInput)="buscarDatosEsposo($event.detail.value || '')">
+      </ion-input>
+    </div>
+
+    <div class="mensaje-busqueda" *ngIf="buscandoEsposo">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Buscando información del esposo...</span>
+    </div>
+
+    <div
+      class="mensaje-busqueda"
+      *ngIf="mensajeBusquedaEsposo"
+      [class.exito]="mensajeBusquedaEsposo.includes('Datos encontrados')">
+
+      <ion-icon
+        [name]="mensajeBusquedaEsposo.includes('Datos encontrados')
+          ? 'checkmark-circle-outline'
+          : 'information-circle-outline'">
+      </ion-icon>
+
+      <span>{{ mensajeBusquedaEsposo }}</span>
+    </div>
+
+    <div class="campo">
+      <ion-label>Fecha de nacimiento</ion-label>
+      <ion-input
+        type="date"
+        [(ngModel)]="matrimonio.fecha_nacimiento_esposo">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Lugar de nacimiento</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.lugar_nacimiento_esposo"
+        placeholder="Ciudad, cantón o provincia"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Nombre del padre</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.nombre_padre_esposo"
+        placeholder="Nombres completos"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Nombre de la madre</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.nombre_madre_esposo"
+        placeholder="Nombres completos"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo campo-completo">
+      <ion-label>Parroquia donde fue bautizado</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.parroquia_bautismo_esposo"
+        placeholder="Nombre de la parroquia donde recibió el bautismo"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+  </div>
+</section>
+
+      <!-- ========================================= -->
+      <!-- 3. DATOS DE LA ESPOSA -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+  <div class="titulo-seccion">
+    <div class="icono-seccion icono-dorado">
+      <ion-icon name="person-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h2>Datos de la esposa</h2>
+      <p>Información personal y familiar de la contrayente.</p>
+    </div>
+  </div>
+
+  <div class="formulario-grid">
+
+    <div class="campo">
+      <ion-label>Nombres *</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.nombres_esposa"
+        placeholder="Nombres de la esposa"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Apellidos *</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.apellidos_esposa"
+        placeholder="Apellidos de la esposa"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo campo-completo">
+      <ion-label>Cédula de la esposa</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.cedula_esposa"
+        placeholder="Ingrese los 10 dígitos"
+        inputmode="numeric"
+        maxlength="10"
+        (ionInput)="buscarDatosEsposa($event.detail.value || '')">
+      </ion-input>
+    </div>
+
+    <div class="mensaje-busqueda" *ngIf="buscandoEsposa">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Buscando información de la esposa...</span>
+    </div>
+
+    <div
+      class="mensaje-busqueda"
+      *ngIf="mensajeBusquedaEsposa"
+      [class.exito]="mensajeBusquedaEsposa.includes('Datos encontrados')">
+
+      <ion-icon
+        [name]="mensajeBusquedaEsposa.includes('Datos encontrados')
+          ? 'checkmark-circle-outline'
+          : 'information-circle-outline'">
+      </ion-icon>
+
+      <span>{{ mensajeBusquedaEsposa }}</span>
+    </div>
+
+    <div class="campo">
+      <ion-label>Fecha de nacimiento</ion-label>
+      <ion-input
+        type="date"
+        [(ngModel)]="matrimonio.fecha_nacimiento_esposa">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Lugar de nacimiento</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.lugar_nacimiento_esposa"
+        placeholder="Ciudad, cantón o provincia"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Nombre del padre</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.nombre_padre_esposa"
+        placeholder="Nombres completos"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Nombre de la madre</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.nombre_madre_esposa"
+        placeholder="Nombres completos"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo campo-completo">
+      <ion-label>Parroquia donde fue bautizada</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.parroquia_bautismo_esposa"
+        placeholder="Nombre de la parroquia donde recibió el bautismo"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+  </div>
+</section>
+
+      <!-- ========================================= -->
+      <!-- 4. TESTIGOS -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario">
+
+        <div class="titulo-seccion">
+
+          <div class="icono-seccion">
+            <ion-icon name="people-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Testigos del matrimonio</h2>
+            <p>Personas que constan como testigos de la celebración.</p>
+          </div>
+
+        </div>
+
+        <div class="formulario-grid">
+
+          <div class="campo">
+            <ion-label>Primer testigo</ion-label>
+
+            <ion-input
+              [(ngModel)]="matrimonio.testigo_1"
+              placeholder="Nombre completo"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+          <div class="campo">
+            <ion-label>Segundo testigo</ion-label>
+
+            <ion-input
+              [(ngModel)]="matrimonio.testigo_2"
+              placeholder="Nombre completo"
+              maxlength="200">
+            </ion-input>
+          </div>
+
+        </div>
+
+      </section>
+
+      <section class="seccion-formulario">
+
+  <div class="titulo-seccion">
+    <div class="icono-seccion">
+      <ion-icon name="people-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h2>Padrinos del matrimonio</h2>
+      <p>Datos de las personas que acompañaron a los contrayentes como padrinos.</p>
+    </div>
+  </div>
+
+  <div class="formulario-grid">
+
+    <div class="campo">
+      <ion-label>Nombre del padrino</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.padrino_boda"
+        placeholder="Nombres y apellidos del padrino"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Nombre de la madrina</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.madrina_boda"
+        placeholder="Nombres y apellidos de la madrina"
+        maxlength="200">
+      </ion-input>
+    </div>
+
+  </div>
+</section>
+
+<section class="seccion-formulario">
+
+  <div class="titulo-seccion">
+    <div class="icono-seccion">
+      <ion-icon name="document-text-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h2>Datos del Registro Civil</h2>
+      <p>Información de la inscripción civil del matrimonio.</p>
+    </div>
+  </div>
+
+  <div class="formulario-grid">
+
+    <div class="campo">
+      <ion-label>Año</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.anio_registro_civil"
+        placeholder="Ej. 2026"
+        maxlength="10">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Libro</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.libro_registro_civil"
+        placeholder="Número de libro"
+        maxlength="30">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Folio</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.folio_registro_civil"
+        placeholder="Número de folio"
+        maxlength="30">
+      </ion-input>
+    </div>
+
+    <div class="campo">
+      <ion-label>Acta</ion-label>
+      <ion-input
+        [(ngModel)]="matrimonio.acta_registro_civil"
+        placeholder="Número de acta"
+        maxlength="30">
+      </ion-input>
+    </div>
+
+    <div class="campo campo-completo">
+      <ion-label>Observaciones</ion-label>
+      <ion-textarea
+        [(ngModel)]="matrimonio.observacion"
+        placeholder="Escriba aquí alguna observación adicional..."
+        rows="3"
+        autoGrow="true">
+      </ion-textarea>
+    </div>
+
+  </div>
+</section>
+
+      <!-- ========================================= -->
+      <!-- 5. FIRMA PARROQUIAL -->
+      <!-- ========================================= -->
+
+      <section class="seccion-formulario seccion-firma">
+
+        <div class="titulo-seccion">
+
+          <div class="icono-seccion">
+            <ion-icon name="create-outline"></ion-icon>
+          </div>
+
+          <div>
+            <h2>Firma parroquial vigente</h2>
+            <p>Información obtenida desde el módulo Mantenimiento.</p>
+          </div>
+
+        </div>
+
+        <div class="firma-contenido">
+
+          <div class="firma-imagen">
+
+            <img
+              *ngIf="parroco.firmaPreview"
+              [src]="parroco.firmaPreview"
+              alt="Firma del párroco">
+
+            <div
+              class="sin-firma"
+              *ngIf="!parroco.firmaPreview">
+
+              <ion-icon name="image-outline"></ion-icon>
+
+              <span>No hay una firma registrada</span>
+
+            </div>
+
+          </div>
+
+          <div class="firma-datos">
+
+            <strong>
+              {{ parroco.nombre || 'Nombre del párroco' }}
+            </strong>
+
+            <span>
+              {{ parroco.pieFirma || 'Párroco' }}
+            </span>
+
+          </div>
+
+        </div>
+
+        <div class="nota-firma">
+
+          <ion-icon name="lock-closed-outline"></ion-icon>
+
+          <p>
+            Al guardar el matrimonio se conservará una copia histórica
+            del nombre, pie de firma e imagen del párroco vigente.
+            Esta información no cambiará si posteriormente se actualiza
+            el módulo Mantenimiento.
+          </p>
+
+        </div>
+
+      </section>
+
+      <!-- ========================================= -->
+      <!-- CONFIRMACIÓN -->
+      <!-- ========================================= -->
+
+      <div
+        class="confirmacion-registro"
+        *ngIf="matrimonioGuardado">
+
+        <ion-icon name="checkmark-circle"></ion-icon>
+
+        <div>
+          <strong>Matrimonio registrado correctamente</strong>
+          <p>
+            Número de registro: {{ matrimonioId }}
+          </p>
+        </div>
+
+      </div>
+
+      <!-- ========================================= -->
+      <!-- BOTONES -->
+      <!-- ========================================= -->
+
+      <div class="acciones-formulario">
+
+        <ion-button
+          class="boton-secundario"
+          fill="outline"
+          (click)="regresar()"
+          [disabled]="guardando">
+
+          <ion-icon
+            name="arrow-back-outline"
+            slot="start">
+          </ion-icon>
+
+          Regresar
+
+        </ion-button>
+
+        <ion-button
+          *ngIf="matrimonioGuardado"
+          class="boton-nuevo"
+          fill="outline"
+          (click)="nuevoRegistro()">
+
+          <ion-icon
+            name="add-circle-outline"
+            slot="start">
+          </ion-icon>
+
+          Nuevo registro
+
+        </ion-button>
+
+        <ion-button
+          class="boton-guardar"
+          (click)="guardarMatrimonio()"
+          [disabled]="guardando || cargandoParroco">
+
+          <ion-spinner
+            *ngIf="guardando"
+            name="crescent">
+          </ion-spinner>
+
+          <ion-icon
+            *ngIf="!guardando"
+            name="save-outline"
+            slot="start">
+          </ion-icon>
+
+          {{ guardando ? 'Guardando...' : 'Guardar Matrimonio' }}
+
+        </ion-button>
+
+      </div>
+
+    </ng-container>
+
+  </div>
+
+</ion-content>

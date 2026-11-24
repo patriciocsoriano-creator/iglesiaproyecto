@@ -1,0 +1,154 @@
+<ion-header [translucent]="true">
+  <ion-toolbar>
+    <ion-title>iniciar-sesion</ion-title>
+  </ion-toolbar>
+</ion-header>
+
+
+<ion-content [fullscreen]="true" class="login-content">
+
+  <div class="login-container">
+
+    <!-- Panel izquierdo: identidad del sistema -->
+    <section class="brand-panel">
+
+      <div class="brand-content">
+
+        <div class="logo-container">
+          <ion-icon name="business-outline"></ion-icon>
+        </div>
+
+        <h1>IGLESIA</h1>
+        <h2>Sistema de Administración Parroquial</h2>
+
+        <div class="brand-divider"></div>
+
+        <p>
+          Una herramienta para organizar, administrar y
+          preservar la información de nuestra comunidad parroquial.
+        </p>
+
+      </div>
+
+      <div class="brand-footer">
+        <span>Gestión parroquial integral</span>
+      </div>
+
+    </section>
+
+    <!-- Panel derecho: formulario -->
+    <section class="form-panel">
+
+      <div class="login-card">
+
+        <div class="welcome-text">
+          <span class="subtitle">BIENVENIDO</span>
+          <h2>Iniciar sesión</h2>
+          <p>Ingresa tus credenciales para acceder al sistema.</p>
+        </div>
+
+        <form (ngSubmit)="iniciarSesion()">
+
+          <!-- Usuario -->
+          <div class="form-field">
+            <ion-label>Usuario</ion-label>
+
+            <ion-item class="input-item" lines="none">
+              <ion-icon
+                name="person-outline"
+                slot="start">
+              </ion-icon>
+
+              <ion-input
+                name="usuario"
+                type="text"
+                placeholder="Ingresa tu usuario"
+                [(ngModel)]="usuario"
+                autocomplete="username">
+              </ion-input>
+            </ion-item>
+          </div>
+
+          <!-- Contraseña -->
+          <div class="form-field">
+            <ion-label>Contraseña</ion-label>
+
+            <ion-item class="input-item" lines="none">
+              <ion-icon
+                name="lock-closed-outline"
+                slot="start">
+              </ion-icon>
+
+              <ion-input
+                name="contrasena"
+                [type]="contrasenaVisible ? 'text' : 'password'"
+                placeholder="Ingresa tu contraseña"
+                [(ngModel)]="contrasena"
+                autocomplete="current-password">
+              </ion-input>
+
+              <ion-button
+                fill="clear"
+                color="medium"
+                type="button"
+                (click)="alternarContrasena()">
+
+                <ion-icon
+                  [name]="contrasenaVisible ? 'eye-off-outline' : 'eye-outline'"
+                  slot="icon-only">
+                </ion-icon>
+
+              </ion-button>
+
+            </ion-item>
+          </div>
+
+          <!-- Mensaje de validación -->
+          <div class="error-message" *ngIf="mensaje">
+            <ion-icon name="alert-circle-outline"></ion-icon>
+            {{ mensaje }}
+          </div>
+
+          <!-- Botón -->
+          
+<ion-button
+  expand="block"
+  type="submit"
+  class="login-button"
+  [disabled]="cargando">
+
+  <ion-spinner
+    *ngIf="cargando"
+    name="crescent">
+  </ion-spinner>
+
+  <span *ngIf="!cargando">Ingresar al sistema</span>
+
+  <ion-icon
+    *ngIf="!cargando"
+    name="arrow-forward-outline"
+    slot="end">
+  </ion-icon>
+
+</ion-button>
+
+
+        </form>
+
+        <div class="security-info">
+          <ion-icon name="shield-checkmark-outline"></ion-icon>
+          <span>Acceso privado y protegido</span>
+        </div>
+
+      </div>
+
+      <div class="form-footer">
+        © {{ anioActual }} IGLESIA · Sistema de Administración Parroquial
+      </div>
+
+    </section>
+
+  </div>
+
+</ion-content>
+

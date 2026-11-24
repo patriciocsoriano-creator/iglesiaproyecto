@@ -1,0 +1,425 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-listado">
+
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Listado de matrimonios</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button
+        (click)="cargarMatrimonios()"
+        [disabled]="cargando">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido-listado">
+
+  <div class="contenedor">
+
+    <div class="encabezado">
+      <div class="icono-encabezado">
+        <ion-icon name="heart-outline"></ion-icon>
+      </div>
+
+      <div>
+        <h1>Registros de matrimonio</h1>
+        <p>Consulta y administración de los matrimonios registrados en la parroquia.</p>
+      </div>
+    </div>
+
+    <div class="tarjeta-resumen">
+      <div class="resumen-icono">
+        <ion-icon name="book-outline"></ion-icon>
+      </div>
+
+      <div class="resumen-texto">
+        <span>Total de matrimonios registrados</span>
+        <strong>{{ matrimonios.length }}</strong>
+      </div>
+    </div>
+
+    <div class="tarjeta-busqueda">
+      <div class="titulo-seccion">
+        <ion-icon name="search-outline"></ion-icon>
+        <h2>Buscar matrimonio</h2>
+      </div>
+
+      <ion-searchbar
+        placeholder="Buscar por número, nombres, apellidos o cédula..."
+        [value]="busqueda"
+        (ionInput)="buscarMatrimonios($event)"
+        debounce="350"
+        animated="true">
+      </ion-searchbar>
+    </div>
+
+    <div class="mensaje-error" *ngIf="mensajeError">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      <span>{{ mensajeError }}</span>
+    </div>
+
+    <div class="estado-cargando" *ngIf="cargando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando registros de matrimonios...</p>
+    </div>
+
+    <div class="tarjeta-listado" *ngIf="!cargando">
+
+      <div class="titulo-seccion">
+        <ion-icon name="list-outline"></ion-icon>
+        <h2>Matrimonios registrados</h2>
+      </div>
+
+      <div class="tabla-contenedor" *ngIf="matrimonios.length > 0">
+        <table>
+          <thead>
+            <tr>
+              <th>N.º Matrimonio</th>
+              <th>ID</th>
+              <th>Esposo</th>
+              <th>Esposa</th>
+              <th>Fecha</th>
+              <th>Lugar</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            <tr *ngFor="let matrimonio of matrimonios">
+              <td>
+                <span class="numero-registro">
+                  {{ matrimonio.numero_matrimonio || 'S/N' }}
+                </span>
+              </td>
+
+              <td>{{ matrimonio.id }}</td>
+
+              <td>
+                {{ matrimonio.nombres_esposo }}
+                {{ matrimonio.apellidos_esposo }}
+              </td>
+
+              <td>
+                {{ matrimonio.nombres_esposa }}
+                {{ matrimonio.apellidos_esposa }}
+              </td>
+
+              <td>{{ formatoFecha(matrimonio.fecha_matrimonio) }}</td>
+
+              <td>{{ matrimonio.lugar_matrimonio || 'No registrado' }}</td>
+
+              <td>
+                <ion-button
+                  size="small"
+                  class="boton-detalle"
+                  (click)="verDetalle(matrimonio.id)">
+                  <ion-icon name="eye-outline" slot="start"></ion-icon>
+                  Ver detalle
+                </ion-button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="estado-vacio" *ngIf="matrimonios.length === 0">
+        <ion-icon name="document-text-outline"></ion-icon>
+        <h3>No hay matrimonios registrados</h3>
+        <p>
+          No se encontraron registros que coincidan con la búsqueda.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="cargando-detalle" *ngIf="consultandoDetalle">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Consultando información del matrimonio...</p>
+    </div>
+
+    <div class="tarjeta-detalle" *ngIf="matrimonioSeleccionado">
+
+      <div class="detalle-encabezado">
+        <div>
+          <span class="etiqueta-detalle">DETALLE DEL REGISTRO</span>
+          <h2>Información del matrimonio</h2>
+          <p>
+            Registro N.º
+            {{ matrimonioSeleccionado.numero_matrimonio || 'S/N' }}
+          </p>
+        </div>
+
+        <ion-button
+          fill="clear"
+          class="boton-cerrar"
+          (click)="cerrarDetalle()">
+          <ion-icon name="close-outline"></ion-icon>
+        </ion-button>
+      </div>
+
+      <div class="detalle-seccion">
+        <h3>
+          <ion-icon name="heart-outline"></ion-icon>
+          Datos de la celebración
+        </h3>
+
+        <div class="detalle-grid">
+          <div class="campo">
+            <label>Número de matrimonio</label>
+            <strong>{{ texto(matrimonioSeleccionado.numero_matrimonio) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Fecha del matrimonio</label>
+            <strong>{{ formatoFecha(matrimonioSeleccionado.fecha_matrimonio) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Tomo</label>
+            <strong>{{ texto(matrimonioSeleccionado.tomo_matrimonio) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Página</label>
+            <strong>{{ texto(matrimonioSeleccionado.pagina_matrimonio) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Lugar del matrimonio</label>
+            <strong>{{ texto(matrimonioSeleccionado.lugar_matrimonio) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Ministro</label>
+            <strong>{{ texto(matrimonioSeleccionado.ministro) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detalle-seccion">
+        <h3>
+          <ion-icon name="man-outline"></ion-icon>
+          Datos del esposo
+        </h3>
+
+        <div class="detalle-grid">
+          <div class="campo ancho-completo">
+            <label>Nombres y apellidos</label>
+            <strong>{{ nombreCompleto('esposo') }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Cédula</label>
+            <strong>{{ texto(matrimonioSeleccionado.cedula_esposo) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Fecha de nacimiento</label>
+            <strong>{{ formatoFecha(matrimonioSeleccionado.fecha_nacimiento_esposo) }}</strong>
+          </div>
+
+          <div class="campo ancho-completo">
+            <label>Lugar de nacimiento</label>
+            <strong>{{ texto(matrimonioSeleccionado.lugar_nacimiento_esposo) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Nombre del padre</label>
+            <strong>{{ texto(matrimonioSeleccionado.nombre_padre_esposo) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Nombre de la madre</label>
+            <strong>{{ texto(matrimonioSeleccionado.nombre_madre_esposo) }}</strong>
+          </div>
+
+          <div class="campo ancho-completo">
+            <label>Parroquia de bautismo</label>
+            <strong>{{ texto(matrimonioSeleccionado.parroquia_bautismo_esposo) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detalle-seccion">
+        <h3>
+          <ion-icon name="woman-outline"></ion-icon>
+          Datos de la esposa
+        </h3>
+
+        <div class="detalle-grid">
+          <div class="campo ancho-completo">
+            <label>Nombres y apellidos</label>
+            <strong>{{ nombreCompleto('esposa') }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Cédula</label>
+            <strong>{{ texto(matrimonioSeleccionado.cedula_esposa) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Fecha de nacimiento</label>
+            <strong>{{ formatoFecha(matrimonioSeleccionado.fecha_nacimiento_esposa) }}</strong>
+          </div>
+
+          <div class="campo ancho-completo">
+            <label>Lugar de nacimiento</label>
+            <strong>{{ texto(matrimonioSeleccionado.lugar_nacimiento_esposa) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Nombre del padre</label>
+            <strong>{{ texto(matrimonioSeleccionado.nombre_padre_esposa) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Nombre de la madre</label>
+            <strong>{{ texto(matrimonioSeleccionado.nombre_madre_esposa) }}</strong>
+          </div>
+
+          <div class="campo ancho-completo">
+            <label>Parroquia de bautismo</label>
+            <strong>{{ texto(matrimonioSeleccionado.parroquia_bautismo_esposa) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detalle-seccion">
+        <h3>
+          <ion-icon name="people-outline"></ion-icon>
+          Testigos y padrinos
+        </h3>
+
+        <div class="detalle-grid">
+          <div class="campo">
+            <label>Testigo 1</label>
+            <strong>{{ texto(matrimonioSeleccionado.testigo_1) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Testigo 2</label>
+            <strong>{{ texto(matrimonioSeleccionado.testigo_2) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Padrino de boda</label>
+            <strong>{{ texto(matrimonioSeleccionado.padrino_boda) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Madrina de boda</label>
+            <strong>{{ texto(matrimonioSeleccionado.madrina_boda) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detalle-seccion">
+        <h3>
+          <ion-icon name="document-text-outline"></ion-icon>
+          Registro civil
+        </h3>
+
+        <div class="detalle-grid">
+          <div class="campo">
+            <label>Año</label>
+            <strong>{{ texto(matrimonioSeleccionado.anio_registro_civil) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Libro</label>
+            <strong>{{ texto(matrimonioSeleccionado.libro_registro_civil) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Folio</label>
+            <strong>{{ texto(matrimonioSeleccionado.folio_registro_civil) }}</strong>
+          </div>
+
+          <div class="campo">
+            <label>Acta</label>
+            <strong>{{ texto(matrimonioSeleccionado.acta_registro_civil) }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="detalle-seccion">
+        <h3>
+          <ion-icon name="reader-outline"></ion-icon>
+          Observaciones
+        </h3>
+
+        <div class="observacion-detalle">
+          {{ texto(matrimonioSeleccionado.observacion) }}
+        </div>
+      </div>
+
+      <div class="detalle-seccion firma-seccion">
+        <h3>
+          <ion-icon name="create-outline"></ion-icon>
+          Firma parroquial del registro
+        </h3>
+
+        <div class="firma-informacion">
+          <div class="firma-imagen-contenedor">
+            <img
+              *ngIf="matrimonioSeleccionado.parroco_firma_data"
+              [src]="
+                matrimonioSeleccionado.parroco_firma_data.startsWith('data:')
+                  ? matrimonioSeleccionado.parroco_firma_data
+                  : 'data:' + (matrimonioSeleccionado.parroco_firma_tipo || 'image/png') + ';base64,' + matrimonioSeleccionado.parroco_firma_data
+              "
+              alt="Firma histórica del párroco">
+
+            <span *ngIf="!matrimonioSeleccionado.parroco_firma_data">
+              Sin imagen de firma registrada
+            </span>
+          </div>
+
+          <div>
+            <strong>{{ texto(matrimonioSeleccionado.parroco_nombre) }}</strong>
+            <p>{{ texto(matrimonioSeleccionado.pie_firma) }}</p>
+            <small>Firma guardada al momento del registro del matrimonio.</small>
+          </div>
+        </div>
+      </div>
+
+      <div class="acciones-detalle">
+        <ion-button
+          class="boton-imprimir"
+          (click)="imprimirMatrimonio()"
+          [disabled]="generandoPdf">
+          <ion-spinner *ngIf="generandoPdf" name="crescent"></ion-spinner>
+          <ion-icon *ngIf="!generandoPdf" name="print-outline" slot="start"></ion-icon>
+          {{ generandoPdf ? 'Generando...' : 'Imprimir certificado' }}
+        </ion-button>
+
+        <ion-button
+          class="boton-whatsapp"
+          (click)="enviarWhatsApp()"
+          [disabled]="preparandoWhatsApp">
+          <ion-spinner *ngIf="preparandoWhatsApp" name="crescent"></ion-spinner>
+          <ion-icon *ngIf="!preparandoWhatsApp" name="logo-whatsapp" slot="start"></ion-icon>
+          {{ preparandoWhatsApp ? 'Preparando...' : 'Enviar por WhatsApp' }}
+        </ion-button>
+
+        <ion-button
+          fill="outline"
+          color="medium"
+          (click)="cerrarDetalle()">
+          Cerrar detalle
+        </ion-button>
+      </div>
+
+    </div>
+
+  </div>
+</ion-content>

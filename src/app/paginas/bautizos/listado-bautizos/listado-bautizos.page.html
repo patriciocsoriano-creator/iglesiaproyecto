@@ -1,0 +1,860 @@
+
+<ion-header class="ion-no-border">
+  <ion-toolbar class="toolbar-listado">
+
+    <ion-buttons slot="start">
+      <ion-button (click)="regresar()">
+        <ion-icon name="arrow-back-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+    <ion-title>Listado de bautizos</ion-title>
+
+    <ion-buttons slot="end">
+      <ion-button
+        (click)="cargarBautizos()"
+        [disabled]="cargando">
+        <ion-icon name="refresh-outline"></ion-icon>
+      </ion-button>
+    </ion-buttons>
+
+  </ion-toolbar>
+</ion-header>
+
+<ion-content class="contenido-listado">
+
+  <div class="contenedor">
+
+    <!-- ENCABEZADO -->
+
+    <div class="encabezado">
+
+      <div class="icono-encabezado">
+        <ion-icon name="water-outline"></ion-icon>
+      </div>
+
+      <div>
+        <h1>Registros de bautismo</h1>
+        <p>
+          Consulta y administra los bautismos registrados en la parroquia.
+        </p>
+      </div>
+
+    </div>
+
+    <!-- RESUMEN -->
+
+    <div class="resumen">
+
+      <div class="resumen-icono">
+        <ion-icon name="documents-outline"></ion-icon>
+      </div>
+
+      <div>
+        <span>Total de registros encontrados</span>
+        <strong>{{ bautizos.length }}</strong>
+      </div>
+
+    </div>
+
+    <!-- BUSCADOR -->
+
+    <section class="tarjeta-busqueda">
+
+      <h2>Buscar bautismo</h2>
+
+      <p>
+        Busca por número, nombres, apellidos o cédula.
+      </p>
+
+      <ion-searchbar
+        placeholder="Escribe para buscar..."
+        [value]="busqueda"
+        (ionInput)="buscarBautizos($event)"
+        debounce="300"
+        animated="true"
+        show-clear-button="focus">
+      </ion-searchbar>
+
+    </section>
+
+    <!-- ERROR -->
+
+    <div class="mensaje-error" *ngIf="mensajeError">
+      <ion-icon name="alert-circle-outline"></ion-icon>
+      {{ mensajeError }}
+    </div>
+
+    <!-- CARGANDO -->
+
+    <div class="estado-cargando" *ngIf="cargando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Cargando registros de bautizos...</p>
+    </div>
+
+    <!-- TABLA -->
+
+    <section class="tarjeta-listado" *ngIf="!cargando">
+
+      <div class="encabezado-listado">
+        <div>
+          <h2>Listado general</h2>
+          <p>Registros almacenados en SQLite.</p>
+        </div>
+
+        <span class="contador">
+          {{ bautizos.length }} registros
+        </span>
+      </div>
+
+      <div class="tabla-contenedor" *ngIf="bautizos.length > 0">
+
+        <table>
+
+          <thead>
+            <tr>
+              <th>N.º bautizo</th>
+              <th>ID</th>
+              <th>Bautizado</th>
+              <th>Fecha</th>
+              <th>Lugar</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+
+          <tbody>
+
+            <tr *ngFor="let bautizo of bautizos">
+
+              <td>
+                <strong class="numero-registro">
+                  {{ bautizo.numero_bautizo }}
+                </strong>
+              </td>
+
+              <td>
+                <span class="id-registro">
+                  #{{ bautizo.id }}
+                </span>
+              </td>
+
+              <td>
+                <div class="persona">
+
+                  <div class="avatar">
+                    <ion-icon name="person-outline"></ion-icon>
+                  </div>
+
+                  <div>
+                    <strong>
+                      {{ bautizo.nombres_bautizado }}
+                    </strong>
+
+                    <span>
+                      {{ bautizo.apellidos_bautizado }}
+                    </span>
+                  </div>
+
+                </div>
+              </td>
+
+              <td>
+                {{ formatoFecha(bautizo.fecha_bautizo) }}
+              </td>
+
+              <td>
+                {{ bautizo.lugar_bautizo }}
+              </td>
+
+              <td>
+                <ion-button
+                  class="boton-ver"
+                  size="small"
+                  fill="outline"
+                  (click)="verDetalle(bautizo.id)">
+
+                  <ion-icon
+                    name="eye-outline"
+                    slot="start">
+                  </ion-icon>
+
+                  Ver detalle
+
+                </ion-button>
+              </td>
+
+            </tr>
+
+          </tbody>
+
+        </table>
+
+      </div>
+
+      <!-- SIN REGISTROS -->
+
+      <div class="sin-registros" *ngIf="bautizos.length === 0">
+
+        <div class="icono-vacio">
+          <ion-icon name="folder-open-outline"></ion-icon>
+        </div>
+
+        <h3>No se encontraron bautizos</h3>
+
+        <p>
+          No existen registros que coincidan con la búsqueda.
+        </p>
+
+      </div>
+
+    </section>
+
+    <!-- CONSULTANDO DETALLE -->
+
+    <div class="estado-cargando" *ngIf="consultandoDetalle">
+      <ion-spinner name="crescent"></ion-spinner>
+      <p>Consultando información del bautismo...</p>
+    </div>
+
+
+<!-- =====================================================
+     FORMULARIO DE EDICIÓN DE BAUTIZO
+===================================================== -->
+
+<section
+  class="tarjeta-edicion"
+  *ngIf="bautizoSeleccionado && editandoBautizo && bautizoEdicion">
+
+  <div class="edicion-encabezado">
+    <div>
+      <span class="etiqueta-detalle">ACTUALIZACIÓN DE REGISTRO</span>
+      <h2>Modificar bautismo</h2>
+      <p>Actualiza la información del registro sacramental.</p>
+    </div>
+
+    <ion-button
+      fill="clear"
+      color="medium"
+      (click)="cancelarEdicion()"
+      [disabled]="guardandoCambios">
+      <ion-icon name="close-circle-outline"></ion-icon>
+    </ion-button>
+  </div>
+
+  <form (ngSubmit)="guardarCambios()">
+
+    <!-- DATOS DEL SACRAMENTO -->
+
+    <div class="formulario-seccion">
+      <h3>
+        <ion-icon name="book-outline"></ion-icon>
+        Datos del sacramento
+      </h3>
+
+      <div class="formulario-grid">
+
+        <ion-item>
+          <ion-label position="stacked">Número de bautizo *</ion-label>
+          <ion-input
+            name="numero_bautizo"
+            [(ngModel)]="bautizoEdicion.numero_bautizo"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Fecha del bautizo *</ion-label>
+          <ion-input
+            type="date"
+            name="fecha_bautizo"
+            [(ngModel)]="bautizoEdicion.fecha_bautizo"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Tomo</ion-label>
+          <ion-input
+            name="tomo_bautizo"
+            [(ngModel)]="bautizoEdicion.tomo_bautizo">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Página</ion-label>
+          <ion-input
+            name="pagina_bautizo"
+            [(ngModel)]="bautizoEdicion.pagina_bautizo">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Lugar del bautizo *</ion-label>
+          <ion-input
+            name="lugar_bautizo"
+            [(ngModel)]="bautizoEdicion.lugar_bautizo"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Ministro *</ion-label>
+          <ion-input
+            name="ministro"
+            [(ngModel)]="bautizoEdicion.ministro"
+            required>
+          </ion-input>
+        </ion-item>
+
+      </div>
+    </div>
+
+    <!-- DATOS DEL BAUTIZADO -->
+
+    <div class="formulario-seccion">
+      <h3>
+        <ion-icon name="person-outline"></ion-icon>
+        Datos del bautizado
+      </h3>
+
+      <div class="formulario-grid">
+
+        <ion-item>
+          <ion-label position="stacked">Nombres *</ion-label>
+          <ion-input
+            name="nombres_bautizado"
+            [(ngModel)]="bautizoEdicion.nombres_bautizado"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Apellidos *</ion-label>
+          <ion-input
+            name="apellidos_bautizado"
+            [(ngModel)]="bautizoEdicion.apellidos_bautizado"
+            required>
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Lugar de nacimiento</ion-label>
+          <ion-input
+            name="lugar_nacimiento"
+            [(ngModel)]="bautizoEdicion.lugar_nacimiento">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Fecha de nacimiento *</ion-label>
+          <ion-input
+            type="date"
+            name="fecha_nacimiento"
+            [(ngModel)]="bautizoEdicion.fecha_nacimiento"
+            required>
+          </ion-input>
+        </ion-item>
+
+      </div>
+    </div>
+
+    <!-- PADRES Y PADRINOS -->
+
+    <div class="formulario-seccion">
+      <h3>
+        <ion-icon name="people-outline"></ion-icon>
+        Padres y padrinos
+      </h3>
+
+      <div class="formulario-grid">
+
+        <ion-item>
+          <ion-label position="stacked">Nombre del padre</ion-label>
+          <ion-input
+            name="nombre_padre"
+            [(ngModel)]="bautizoEdicion.nombre_padre">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Nombre de la madre</ion-label>
+          <ion-input
+            name="nombre_madre"
+            [(ngModel)]="bautizoEdicion.nombre_madre">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Padrino</ion-label>
+          <ion-input
+            name="padrino"
+            [(ngModel)]="bautizoEdicion.padrino">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Madrina</ion-label>
+          <ion-input
+            name="madrina"
+            [(ngModel)]="bautizoEdicion.madrina">
+          </ion-input>
+        </ion-item>
+
+      </div>
+    </div>
+
+    <!-- REGISTRO CIVIL -->
+
+    <div class="formulario-seccion">
+      <h3>
+        <ion-icon name="document-text-outline"></ion-icon>
+        Registro civil
+      </h3>
+
+      <div class="formulario-grid">
+
+        <ion-item>
+          <ion-label position="stacked">Cédula</ion-label>
+          <ion-input
+            name="cedula"
+            [(ngModel)]="bautizoEdicion.cedula">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Año de registro</ion-label>
+          <ion-input
+            name="anio_registro"
+            [(ngModel)]="bautizoEdicion.anio_registro">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Tomo</ion-label>
+          <ion-input
+            name="tomo_registro"
+            [(ngModel)]="bautizoEdicion.tomo_registro">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Página</ion-label>
+          <ion-input
+            name="pagina_registro"
+            [(ngModel)]="bautizoEdicion.pagina_registro">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Acta</ion-label>
+          <ion-input
+            name="acta_registro"
+            [(ngModel)]="bautizoEdicion.acta_registro">
+          </ion-input>
+        </ion-item>
+
+        <ion-item>
+          <ion-label position="stacked">Lugar de inscripción</ion-label>
+          <ion-input
+            name="lugar_registro"
+            [(ngModel)]="bautizoEdicion.lugar_registro">
+          </ion-input>
+        </ion-item>
+
+      </div>
+    </div>
+
+    <!-- NOTA MARGINAL -->
+
+    <div class="formulario-seccion">
+      <h3>
+        <ion-icon name="create-outline"></ion-icon>
+        Nota marginal
+      </h3>
+
+      <ion-item>
+        <ion-textarea
+          name="nota_marginal"
+          [(ngModel)]="bautizoEdicion.nota_marginal"
+          rows="4"
+          autoGrow="true"
+          placeholder="Escribe aquí la nota marginal...">
+        </ion-textarea>
+      </ion-item>
+    </div>
+
+    <!-- AVISO SOBRE FIRMA HISTÓRICA -->
+
+    <div class="aviso-firma">
+      <ion-icon name="shield-checkmark-outline"></ion-icon>
+      <span>
+        La firma y los datos parroquiales históricos del registro
+        se conservarán sin modificaciones.
+      </span>
+    </div>
+
+    <!-- ACCIONES -->
+
+    <div class="acciones-edicion">
+
+      <ion-button
+        type="button"
+        fill="outline"
+        class="boton-cancelar-edicion"
+        (click)="cancelarEdicion()"
+        [disabled]="guardandoCambios">
+
+        <ion-icon name="close-outline" slot="start"></ion-icon>
+        Cancelar
+
+      </ion-button>
+
+      <ion-button
+        type="submit"
+        class="boton-guardar-edicion"
+        [disabled]="guardandoCambios">
+
+        <ion-spinner
+          *ngIf="guardandoCambios"
+          name="crescent"
+          slot="start">
+        </ion-spinner>
+
+        <ion-icon
+          *ngIf="!guardandoCambios"
+          name="save-outline"
+          slot="start">
+        </ion-icon>
+
+        {{ guardandoCambios ? 'Guardando cambios...' : 'Guardar cambios' }}
+
+      </ion-button>
+
+    </div>
+
+  </form>
+
+</section>
+
+
+    <!-- DETALLE -->
+
+    <section
+  class="tarjeta-detalle"
+  *ngIf="bautizoSeleccionado && !editandoBautizo">
+
+      <div class="detalle-encabezado">
+
+        <div>
+          <span class="etiqueta-detalle">CONSULTA DE REGISTRO</span>
+
+          <h2>
+            {{ bautizoSeleccionado.nombres_bautizado }}
+            {{ bautizoSeleccionado.apellidos_bautizado }}
+          </h2>
+
+          <p>
+            Número de bautizo:
+            <strong>{{ bautizoSeleccionado.numero_bautizo }}</strong>
+          </p>
+        </div>
+
+        <ion-button
+          fill="clear"
+          color="medium"
+          (click)="cerrarDetalle()">
+          <ion-icon name="close-circle-outline" slot="start"></ion-icon>
+          Cerrar
+        </ion-button>
+
+      </div>
+
+      <!-- SACRAMENTO -->
+
+      <div class="detalle-seccion">
+
+        <h3>
+          <ion-icon name="book-outline"></ion-icon>
+          Datos del sacramento
+        </h3>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Número de bautizo</span>
+            <strong>{{ bautizoSeleccionado.numero_bautizo }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Fecha del bautizo</span>
+            <strong>{{ formatoFecha(bautizoSeleccionado.fecha_bautizo) }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Tomo</span>
+            <strong>{{ bautizoSeleccionado.tomo_bautizo || 'No registrado' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Página</span>
+            <strong>{{ bautizoSeleccionado.pagina_bautizo || 'No registrada' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Lugar del bautizo</span>
+            <strong>{{ bautizoSeleccionado.lugar_bautizo }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Ministro</span>
+            <strong>{{ bautizoSeleccionado.ministro }}</strong>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- BAUTIZADO -->
+
+      <div class="detalle-seccion">
+
+        <h3>
+          <ion-icon name="person-outline"></ion-icon>
+          Datos del bautizado
+        </h3>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Nombres</span>
+            <strong>{{ bautizoSeleccionado.nombres_bautizado }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Apellidos</span>
+            <strong>{{ bautizoSeleccionado.apellidos_bautizado }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Lugar de nacimiento</span>
+            <strong>{{ bautizoSeleccionado.lugar_nacimiento || 'No registrado' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Fecha de nacimiento</span>
+            <strong>{{ formatoFecha(bautizoSeleccionado.fecha_nacimiento) }}</strong>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- PADRES Y PADRINOS -->
+
+      <div class="detalle-seccion">
+
+        <h3>
+          <ion-icon name="people-outline"></ion-icon>
+          Padres y padrinos
+        </h3>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Padre</span>
+            <strong>{{ bautizoSeleccionado.nombre_padre || 'No registrado' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Madre</span>
+            <strong>{{ bautizoSeleccionado.nombre_madre || 'No registrada' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Padrino</span>
+            <strong>{{ bautizoSeleccionado.padrino || 'No registrado' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Madrina</span>
+            <strong>{{ bautizoSeleccionado.madrina || 'No registrada' }}</strong>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- REGISTRO CIVIL -->
+
+      <div class="detalle-seccion">
+
+        <h3>
+          <ion-icon name="document-text-outline"></ion-icon>
+          Registro Civil
+        </h3>
+
+        <div class="detalle-grid">
+
+          <div class="dato">
+            <span>Cédula</span>
+            <strong>{{ bautizoSeleccionado.cedula || 'No registrada' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Año de registro</span>
+            <strong>{{ bautizoSeleccionado.anio_registro || 'No registrado' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Tomo</span>
+            <strong>{{ bautizoSeleccionado.tomo_registro || 'No registrado' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Página</span>
+            <strong>{{ bautizoSeleccionado.pagina_registro || 'No registrada' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Acta</span>
+            <strong>{{ bautizoSeleccionado.acta_registro || 'No registrada' }}</strong>
+          </div>
+
+          <div class="dato">
+            <span>Lugar de inscripción</span>
+            <strong>{{ bautizoSeleccionado.lugar_registro || 'No registrado' }}</strong>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- NOTA MARGINAL -->
+
+      <div class="detalle-seccion">
+
+        <h3>
+          <ion-icon name="create-outline"></ion-icon>
+          Nota marginal
+        </h3>
+
+        <div class="nota-marginal">
+          {{ bautizoSeleccionado.nota_marginal || 'Ninguna' }}
+        </div>
+
+      </div>
+
+      <!-- FIRMA ACTUAL -->
+
+      <div class="detalle-seccion firma-detalle">
+
+        <h3>
+          <ion-icon name="create-outline"></ion-icon>
+          Firma parroquial vigente
+        </h3>
+
+        <div
+          class="firma-imagen"
+          *ngIf="parrocoVigente.firmaPreview">
+
+          <img
+            [src]="parrocoVigente.firmaPreview"
+            alt="Firma del párroco">
+
+        </div>
+
+        <div
+          class="sin-firma"
+          *ngIf="!parrocoVigente.firmaPreview">
+          No se ha configurado una imagen de firma.
+        </div>
+
+        <div class="linea-firma"></div>
+
+        <strong>
+          {{ parrocoVigente.nombre || 'No hay un párroco configurado' }}
+        </strong>
+
+        <span>{{ parrocoVigente.pieFirma }}</span>
+
+        <p>
+          Datos obtenidos de la configuración parroquial vigente.
+        </p>
+
+      </div>
+
+      <!-- ACCIONES -->
+
+      <div class="detalle-acciones">
+
+        <ion-button
+  class="boton-modificar"
+  fill="outline"
+  (click)="iniciarEdicion()"
+  [disabled]="generandoPdf || guardandoCambios">
+
+  <ion-icon name="create-outline" slot="start"></ion-icon>
+  Modificar bautizo
+
+</ion-button>
+
+        <ion-button
+          class="boton-imprimir"
+          (click)="imprimirBautizo()"
+          [disabled]="generandoPdf">
+
+          <ion-spinner
+            *ngIf="imprimiendo"
+            name="crescent"
+            slot="start">
+          </ion-spinner>
+
+          <ion-icon
+            *ngIf="!imprimiendo"
+            name="print-outline"
+            slot="start">
+          </ion-icon>
+
+          {{ imprimiendo ? 'Generando PDF...' : 'Imprimir registro' }}
+
+        </ion-button>
+
+        <ion-button
+          class="boton-whatsapp"
+          (click)="enviarWhatsApp()"
+          [disabled]="generandoPdf">
+
+          <ion-spinner
+            *ngIf="preparandoWhatsApp"
+            name="crescent"
+            slot="start">
+          </ion-spinner>
+
+          <ion-icon
+            *ngIf="!preparandoWhatsApp"
+            name="logo-whatsapp"
+            slot="start">
+          </ion-icon>
+
+          {{ preparandoWhatsApp ? 'Preparando PDF...' : 'Enviar por WhatsApp' }}
+
+        </ion-button>
+
+        <ion-button
+          class="boton-cerrar"
+          fill="outline"
+          (click)="cerrarDetalle()"
+          [disabled]="generandoPdf">
+
+          <ion-icon
+            name="close-outline"
+            slot="start">
+          </ion-icon>
+
+          Cerrar consulta
+
+        </ion-button>
+
+      </div>
+
+    </section>
+
+  </div>
+
+</ion-content>

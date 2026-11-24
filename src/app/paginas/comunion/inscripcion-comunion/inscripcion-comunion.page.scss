@@ -1,0 +1,530 @@
+
+:host {
+  --azul-principal: #172b4d;
+  --azul-secundario: #243f68;
+  --dorado: #c5a15b;
+  --dorado-claro: #e5d2a5;
+  --fondo: #f3f5f8;
+  --texto: #263449;
+  --texto-secundario: #788496;
+  --borde: #e1e6ed;
+  --blanco: #ffffff;
+}
+
+.toolbar-comunion {
+  --background: var(--azul-principal);
+  --color: #ffffff;
+  --min-height: 62px;
+
+  ion-title {
+    font-size: 17px;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+  }
+
+  ion-button {
+    --color: #ffffff;
+  }
+}
+
+.contenido-comunion {
+  --background: var(--fondo);
+}
+
+.contenedor-comunion {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 24px 45px;
+}
+
+/* =========================================
+   ENCABEZADO
+========================================= */
+
+.encabezado-comunion {
+  text-align: center;
+  margin-bottom: 30px;
+
+  .icono-encabezado {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 20px;
+    background: rgba(197, 161, 91, 0.13);
+    border: 1px solid rgba(197, 161, 91, 0.3);
+
+    ion-icon {
+      font-size: 34px;
+      color: var(--dorado);
+    }
+  }
+
+  h1 {
+    margin: 0;
+    color: var(--azul-principal);
+    font-size: 27px;
+    font-weight: 750;
+  }
+
+  p {
+    max-width: 650px;
+    margin: 10px auto 0;
+    color: var(--texto-secundario);
+    font-size: 14px;
+    line-height: 1.6;
+  }
+}
+
+/* =========================================
+   SECCIONES
+========================================= */
+
+.seccion-formulario {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 4px 16px rgba(24, 43, 77, 0.035);
+}
+
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 19px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #edf0f4;
+
+  .icono-seccion {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 12px;
+    background: rgba(197, 161, 91, 0.13);
+
+    ion-icon {
+      font-size: 23px;
+      color: var(--dorado);
+    }
+  }
+
+  h2 {
+    margin: 0;
+    color: var(--azul-principal);
+    font-size: 17px;
+    font-weight: 700;
+  }
+
+  p {
+    margin: 5px 0 0;
+    color: var(--texto-secundario);
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   GRID DE CAMPOS
+========================================= */
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 21px 20px;
+}
+
+.campo {
+  min-width: 0;
+
+  ion-label {
+    display: block;
+    margin-bottom: 9px;
+    color: #34445c;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  ion-input,
+  ion-select {
+    --background: #fbfcfe;
+    --color: var(--texto);
+    --placeholder-color: #a1aab7;
+    --padding-start: 13px;
+    --padding-end: 13px;
+    min-height: 47px;
+    border: 1px solid #dfe5ed;
+    border-radius: 9px;
+    font-size: 14px;
+    transition: border-color 0.2s ease;
+  }
+
+  ion-input:focus-within,
+  ion-select:focus-within {
+    border-color: var(--dorado);
+  }
+
+  ion-select {
+    width: 100%;
+    max-width: 100%;
+    padding: 0 10px;
+  }
+}
+
+.campo-completo {
+  grid-column: 1 / -1;
+}
+
+.ayuda-campo {
+  margin: 7px 0 0;
+  color: var(--texto-secundario);
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+/* =========================================
+   BÚSQUEDA DE BAUTISMO
+========================================= */
+
+.campo-busqueda {
+  display: flex;
+  align-items: stretch;
+  gap: 10px;
+
+  ion-input {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .boton-buscar {
+    --background: var(--azul-principal);
+    --background-hover: var(--azul-secundario);
+    --color: #ffffff;
+    --border-radius: 9px;
+    height: 47px;
+    margin: 0;
+    font-size: 12px;
+    font-weight: 600;
+
+    ion-icon {
+      font-size: 17px;
+    }
+
+    ion-spinner {
+      width: 18px;
+      height: 18px;
+    }
+  }
+}
+
+.resultado-bautismo {
+  grid-column: 1 / -1;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 10px;
+
+  ion-icon {
+    font-size: 23px;
+    min-width: 23px;
+    margin-top: 1px;
+  }
+
+  strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 5px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  &.encontrado {
+    background: #edf8f1;
+    border: 1px solid #cbe9d5;
+    color: #27643e;
+  }
+
+  &.no-encontrado {
+    background: #fff8e9;
+    border: 1px solid #f0dfb5;
+    color: #82611e;
+  }
+}
+
+/* =========================================
+   FIRMA PARROQUIAL
+========================================= */
+
+.seccion-firma {
+  background: #fbfcfe;
+}
+
+.firma-contenido {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  gap: 13px;
+  text-align: center;
+}
+
+.firma-imagen {
+  width: 230px;
+  height: 105px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #aeb7c4;
+
+  img {
+    max-width: 210px;
+    max-height: 95px;
+    object-fit: contain;
+  }
+
+  .sin-firma {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    color: #9aa5b3;
+    font-size: 12px;
+
+    ion-icon {
+      font-size: 28px;
+    }
+  }
+}
+
+.firma-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  strong {
+    color: var(--azul-principal);
+    font-size: 15px;
+    font-weight: 700;
+  }
+
+  span {
+    color: var(--texto-secundario);
+    font-size: 13px;
+  }
+}
+
+.nota-firma {
+  margin: 20px 0 0;
+  padding: 12px;
+  border-radius: 8px;
+  background: #f1f4f8;
+  color: #637188;
+  font-size: 11px;
+  line-height: 1.6;
+  text-align: center;
+}
+
+/* =========================================
+   ESTADOS
+========================================= */
+
+.estado-carga {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 40px 15px;
+  color: var(--texto-secundario);
+
+  ion-spinner {
+    color: var(--dorado);
+    width: 32px;
+    height: 32px;
+  }
+
+  p {
+    font-size: 13px;
+  }
+}
+
+.mensaje-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  padding: 13px 15px;
+  border-radius: 9px;
+  border: 1px solid #f0caca;
+  background: #fff0f0;
+  color: #a33232;
+  font-size: 13px;
+  line-height: 1.5;
+
+  ion-icon {
+    font-size: 21px;
+    min-width: 21px;
+  }
+}
+
+.confirmacion-registro {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding: 17px;
+  margin-bottom: 20px;
+  background: #edf8f1;
+  border: 1px solid #cbe9d5;
+  border-radius: 10px;
+  color: #27643e;
+
+  ion-icon {
+    font-size: 27px;
+  }
+
+  strong {
+    font-size: 13px;
+  }
+
+  p {
+    margin: 5px 0 0;
+    font-size: 12px;
+  }
+}
+
+/* =========================================
+   ACCIONES
+========================================= */
+
+.acciones-formulario {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+  padding-top: 5px;
+
+  ion-button {
+    height: 47px;
+    margin: 0;
+    --border-radius: 9px;
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .boton-secundario {
+    --color: var(--azul-principal);
+    --border-color: #cbd3df;
+    --background: #ffffff;
+  }
+
+  .boton-guardar {
+    --background: var(--azul-principal);
+    --background-hover: var(--azul-secundario);
+    --color: #ffffff;
+    min-width: 235px;
+
+    ion-icon {
+      font-size: 18px;
+    }
+  }
+}
+
+/* =========================================
+   RESPONSIVE
+========================================= */
+
+@media (max-width: 650px) {
+
+  .contenedor-comunion {
+    padding: 22px 13px 35px;
+  }
+
+  .encabezado-comunion {
+    margin-bottom: 23px;
+
+    h1 {
+      font-size: 22px;
+    }
+
+    p {
+      font-size: 12px;
+    }
+  }
+
+  .seccion-formulario {
+    padding: 18px 15px;
+    border-radius: 12px;
+  }
+
+  .titulo-seccion {
+    gap: 10px;
+
+    h2 {
+      font-size: 15px;
+    }
+
+    p {
+      font-size: 11px;
+    }
+
+    .icono-seccion {
+      width: 38px;
+      height: 38px;
+      min-width: 38px;
+    }
+  }
+
+  .formulario-grid {
+    grid-template-columns: 1fr;
+    gap: 18px;
+  }
+
+  .campo-completo {
+    grid-column: auto;
+  }
+
+  .campo-busqueda {
+    flex-direction: column;
+
+    .boton-buscar {
+      width: 100%;
+    }
+  }
+
+  .acciones-formulario {
+    flex-direction: column-reverse;
+
+    ion-button {
+      width: 100%;
+    }
+
+    .boton-guardar {
+      min-width: 0;
+    }
+  }
+}
+ion-select {
+  --color: #344563;
+  --placeholder-color: #64748b;
+  --placeholder-opacity: 1;
+
+  color: #344563;
+}
+
+ion-select::part(text) {
+  color: #344563 !important;
+  opacity: 1 !important;
+}
+
+ion-select::part(icon) {
+  color: #16a34a;
+}

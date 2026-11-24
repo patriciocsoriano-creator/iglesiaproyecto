@@ -1,0 +1,632 @@
+:host {
+  --azul-principal: #172b4d;
+  --azul-secundario: #243f68;
+  --dorado: #c5a15b;
+  --dorado-claro: #e5d2a5;
+  --fondo: #f3f5f8;
+  --texto: #263449;
+  --texto-secundario: #788496;
+  --borde: #e1e6ed;
+  --blanco: #ffffff;
+}
+
+// ==========================================
+// TOOLBAR
+// ==========================================
+
+.toolbar-confirmacion {
+  --background: var(--azul-principal);
+  --color: #ffffff;
+  --min-height: 64px;
+
+  ion-title {
+    font-size: 17px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+  }
+
+  ion-button {
+    --color: #ffffff;
+  }
+
+  ion-icon {
+    font-size: 23px;
+  }
+}
+
+// ==========================================
+// CONTENIDO
+// ==========================================
+
+.contenido-confirmacion {
+  --background: var(--fondo);
+}
+
+.contenedor-confirmacion {
+  width: 100%;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 30px 28px 45px;
+}
+
+// ==========================================
+// ENCABEZADO
+// ==========================================
+
+.encabezado-pagina {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  margin-bottom: 28px;
+
+  .icono-encabezado {
+    width: 62px;
+    height: 62px;
+    min-width: 62px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--azul-principal);
+    border-radius: 16px;
+    color: var(--dorado-claro);
+
+    ion-icon {
+      font-size: 32px;
+    }
+  }
+
+  h1 {
+    margin: 0 0 7px;
+    color: var(--azul-principal);
+    font-size: 25px;
+    font-weight: 800;
+  }
+
+  p {
+    margin: 0;
+    color: var(--texto-secundario);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+}
+
+// ==========================================
+// SECCIONES
+// ==========================================
+
+.seccion-formulario {
+  background: var(--blanco);
+  border: 1px solid var(--borde);
+  border-radius: 15px;
+  padding: 25px;
+  margin-bottom: 20px;
+  box-shadow: 0 3px 12px rgba(23, 43, 77, 0.045);
+}
+
+.titulo-seccion {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-bottom: 19px;
+  margin-bottom: 22px;
+  border-bottom: 1px solid #edf0f4;
+
+  .icono-seccion {
+    width: 43px;
+    height: 43px;
+    min-width: 43px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f5f1e8;
+    border-radius: 12px;
+    color: var(--azul-principal);
+
+    ion-icon {
+      font-size: 23px;
+    }
+  }
+
+  h2 {
+    margin: 0 0 5px;
+    color: var(--azul-principal);
+    font-size: 17px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 0;
+    color: var(--texto-secundario);
+    font-size: 12.5px;
+    line-height: 1.5;
+  }
+}
+
+// ==========================================
+// GRID DE CAMPOS
+// ==========================================
+
+.formulario-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px 22px;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+
+  label {
+    color: var(--texto);
+    font-size: 13px;
+    font-weight: 650;
+    margin-bottom: 9px;
+
+    span {
+      color: #c0392b;
+    }
+  }
+
+  ion-input,
+  ion-select {
+    --background: #ffffff;
+    --color: var(--texto);
+    --placeholder-color: #9ba5b3;
+    --placeholder-opacity: 1;
+    --border-color: #dce2e9;
+    --border-radius: 9px;
+    --highlight-color-focused: var(--dorado);
+    --padding-start: 13px;
+    --padding-end: 13px;
+
+    font-size: 13px;
+    min-height: 47px;
+  }
+}
+
+// ==========================================
+// BÚSQUEDA POR CÉDULA
+// ==========================================
+
+.busqueda-cedula {
+  display: flex;
+  align-items: flex-end;
+  gap: 13px;
+  margin-bottom: 20px;
+  padding: 17px;
+  background: #f7f8fa;
+  border: 1px solid #e9edf2;
+  border-radius: 11px;
+}
+
+.campo-cedula {
+  flex: 1;
+}
+
+.boton-buscar {
+  --background: var(--azul-principal);
+  --background-hover: var(--azul-secundario);
+  --color: #ffffff;
+  --border-radius: 9px;
+  --box-shadow: none;
+
+  height: 47px;
+  margin: 0;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+
+  ion-icon {
+    margin-right: 7px;
+  }
+
+  ion-spinner {
+    margin-right: 8px;
+  }
+}
+
+// ==========================================
+// ESTADOS DE BÚSQUEDA
+// ==========================================
+
+.estado-busqueda {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 14px 16px;
+  margin-bottom: 21px;
+  border-radius: 10px;
+
+  ion-icon {
+    font-size: 22px;
+    min-width: 22px;
+  }
+
+  strong {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  p {
+    margin: 0;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+}
+
+.estado-busqueda.encontrado {
+  background: #edf7f0;
+  border: 1px solid #cce8d4;
+  color: #267344;
+}
+
+.estado-busqueda.no-encontrado {
+  background: #fff8e9;
+  border: 1px solid #f1dfb8;
+  color: #8a641e;
+}
+
+// ==========================================
+// NOTA PADRINOS
+// ==========================================
+
+.nota-padrinos {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #f5f7fa;
+  border-left: 3px solid var(--dorado);
+  padding: 13px 15px;
+  margin-bottom: 21px;
+  border-radius: 5px;
+
+  ion-icon {
+    color: var(--azul-principal);
+    font-size: 20px;
+    min-width: 20px;
+  }
+
+  span {
+    color: #5e6a7b;
+    font-size: 12px;
+    line-height: 1.6;
+  }
+}
+
+// ==========================================
+// FIRMA PARROQUIAL
+// ==========================================
+
+.firma-contenido {
+  display: flex;
+  align-items: center;
+  gap: 25px;
+  padding: 18px;
+  background: #fafbfc;
+  border: 1px solid #edf0f4;
+  border-radius: 11px;
+}
+
+.firma-imagen {
+  width: 180px;
+  height: 90px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #ffffff;
+  border: 1px dashed #d6dce4;
+  border-radius: 8px;
+  overflow: hidden;
+
+  img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .sin-firma {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 5px;
+    color: #a0a9b6;
+    font-size: 11px;
+
+    ion-icon {
+      font-size: 24px;
+    }
+  }
+}
+
+.firma-datos {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  strong {
+    color: var(--azul-principal);
+    font-size: 15px;
+    font-weight: 750;
+  }
+
+  span {
+    color: var(--texto);
+    font-size: 13px;
+  }
+
+  small {
+    color: var(--texto-secundario);
+    font-size: 11px;
+  }
+}
+
+// ==========================================
+// MENSAJES
+// ==========================================
+
+.mensaje-cargando {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 18px;
+  margin-bottom: 18px;
+  color: var(--azul-principal);
+  font-size: 13px;
+
+  ion-spinner {
+    color: var(--dorado);
+  }
+}
+
+.mensaje-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 13px 15px;
+  margin-bottom: 18px;
+  background: #fff0ef;
+  border: 1px solid #f3d0cd;
+  border-radius: 9px;
+  color: #a9362d;
+  font-size: 12px;
+  line-height: 1.5;
+
+  ion-icon {
+    font-size: 20px;
+    min-width: 20px;
+  }
+}
+
+// ==========================================
+// BOTONES
+// ==========================================
+
+.acciones-formulario,
+.acciones-exito {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 12px;
+  margin-top: 25px;
+}
+
+.boton-regresar {
+  --color: var(--azul-principal);
+  --border-color: #cbd3de;
+  --border-radius: 9px;
+  --background-hover: #f0f2f5;
+  --box-shadow: none;
+
+  height: 47px;
+  font-size: 12px;
+  font-weight: 650;
+}
+
+.boton-guardar {
+  --background: var(--azul-principal);
+  --background-hover: var(--azul-secundario);
+  --color: #ffffff;
+  --border-radius: 9px;
+  --box-shadow: none;
+
+  height: 47px;
+  font-size: 12px;
+  font-weight: 700;
+
+  ion-icon {
+    margin-right: 7px;
+  }
+
+  ion-spinner {
+    margin-right: 8px;
+  }
+}
+
+// ==========================================
+// REGISTRO EXITOSO
+// ==========================================
+
+.registro-exitoso {
+  max-width: 600px;
+  margin: 65px auto;
+  padding: 40px 30px;
+  text-align: center;
+  background: #ffffff;
+  border: 1px solid var(--borde);
+  border-radius: 16px;
+  box-shadow: 0 5px 20px rgba(23, 43, 77, 0.06);
+
+  .exito-icono {
+    width: 75px;
+    height: 75px;
+    margin: 0 auto 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eaf6ee;
+    border-radius: 50%;
+    color: #328451;
+
+    ion-icon {
+      font-size: 45px;
+    }
+  }
+
+  h2 {
+    color: var(--azul-principal);
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 12px;
+  }
+
+  p {
+    color: var(--texto-secundario);
+    font-size: 13px;
+    line-height: 1.6;
+    margin: 0 auto 20px;
+    max-width: 430px;
+  }
+}
+
+.numero-registro {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 15px;
+  margin: 20px auto;
+  max-width: 230px;
+  background: #f5f7fa;
+  border-radius: 9px;
+
+  span {
+    color: var(--texto-secundario);
+    font-size: 11px;
+  }
+
+  strong {
+    color: var(--azul-principal);
+    font-size: 22px;
+  }
+}
+
+.acciones-exito {
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+// ==========================================
+// RESPONSIVE
+// ==========================================
+
+@media (max-width: 700px) {
+
+  .contenedor-confirmacion {
+    padding: 22px 15px 35px;
+  }
+
+  .encabezado-pagina {
+    align-items: flex-start;
+    gap: 13px;
+
+    .icono-encabezado {
+      width: 50px;
+      height: 50px;
+      min-width: 50px;
+
+      ion-icon {
+        font-size: 26px;
+      }
+    }
+
+    h1 {
+      font-size: 20px;
+    }
+
+    p {
+      font-size: 12px;
+    }
+  }
+
+  .seccion-formulario {
+    padding: 19px 16px;
+  }
+
+  .formulario-grid {
+    grid-template-columns: 1fr;
+    gap: 17px;
+  }
+
+  .busqueda-cedula {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .boton-buscar {
+    width: 100%;
+  }
+
+  .firma-contenido {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .firma-imagen {
+    width: 100%;
+    max-width: 250px;
+  }
+
+  .acciones-formulario {
+    flex-direction: column-reverse;
+    align-items: stretch;
+
+    ion-button {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+
+@media (max-width: 400px) {
+
+  .titulo-seccion {
+    align-items: flex-start;
+
+    h2 {
+      font-size: 15px;
+    }
+  }
+
+  .registro-exitoso {
+    padding: 30px 18px;
+  }
+
+  .acciones-exito {
+    flex-direction: column;
+
+    ion-button {
+      width: 100%;
+      margin: 0;
+    }
+  }
+}
+/* Texto visible del selector de Lugar de Confirmación */
+ion-select {
+  color: #1c2b45 !important;
+  --placeholder-color: #64748b;
+  --placeholder-opacity: 1;
+}
+
+/* Texto seleccionado */
+ion-select::part(text) {
+  color: #1c2b45 !important;
+  opacity: 1 !important;
+}
+
+/* Flecha del selector */
+ion-select::part(icon) {
+  color: #16a34a;
+  opacity: 1;
+}
