@@ -319,6 +319,65 @@
 
     </section>
 
+
+<!-- RESPALDO Y RESTAURACIÓN -->
+<section class="seccion" *ngIf="sqlite.esDispositivoMovil()">
+
+  <div class="seccion-titulo">
+    <div class="seccion-icono">
+      <ion-icon name="cloud-download-outline"></ion-icon>
+    </div>
+
+    <div>
+      <h2>Respaldo y restauración</h2>
+      <p>
+        Importa los registros de tu aplicación IGLESIA de Windows
+        en este dispositivo.
+      </p>
+    </div>
+  </div>
+
+  <div class="firma-contenedor">
+
+    <div class="firma-informacion">
+      <div class="firma-icono">
+        <ion-icon name="document-attach-outline"></ion-icon>
+      </div>
+
+      <div>
+        <h3>Importar respaldo de Windows</h3>
+        <p>
+          Selecciona el archivo JSON que generaste en tu computadora.
+          Se comprobará su integridad antes de importar los registros.
+        </p>
+      </div>
+    </div>
+
+    <label class="boton-archivo boton-firma">
+      <ion-icon name="cloud-upload-outline"></ion-icon>
+      {{ importando ? 'Importando respaldo...' : 'Seleccionar archivo de respaldo' }}
+
+      <input
+        type="file"
+        accept=".json,application/json"
+        [disabled]="importando || guardando"
+        (change)="importarRespaldo($event)">
+    </label>
+
+    <small>
+      Selecciona el archivo Respaldo_Iglesia con extensión JSON.
+    </small>
+
+    <div class="indicador-carga" *ngIf="importando">
+      <ion-spinner name="crescent"></ion-spinner>
+      <span>Verificando e importando información. No cierres la aplicación.</span>
+    </div>
+
+  </div>
+
+</section>
+
+
     <!-- NOTA INFORMATIVA -->
     <div class="nota-informativa">
       <ion-icon name="shield-checkmark-outline"></ion-icon>
