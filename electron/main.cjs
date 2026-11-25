@@ -721,32 +721,57 @@ function createWindow() {
 // AUTENTICACIÓN
 // =====================================================
 
+// =====================================================
+// AUTENTICACIÓN
+// =====================================================
+
 ipcMain.handle(
   'auth:login',
   (event, credentials) => {
 
-    if (
-      !credentials ||
-      typeof credentials.usuario !== 'string' ||
-      typeof credentials.contrasena !== 'string' ||
-      credentials.usuario.length > 100 ||
-      credentials.contrasena.length > 200
-    ) {
+    console.log('[LOGIN] Solicitud recibida desde Angular');
+
+    try {
+
+      if (
+        !credentials ||
+        typeof credentials.usuario !== 'string' ||
+        typeof credentials.contrasena !== 'string' ||
+        credentials.usuario.length > 100 ||
+        credentials.contrasena.length > 200
+      ) {
+
+        console.log('[LOGIN] Datos inválidos');
+
+        return {
+          success: false,
+          message: 'Datos de acceso inválidos.'
+        };
+
+      }
+
+      const respuesta = autenticarUsuario(
+        credentials.usuario.trim(),
+        credentials.contrasena
+      );
+
+      console.log(
+        '[LOGIN] Resultado:',
+        respuesta.success ? 'Autenticación correcta' : 'Credenciales incorrectas'
+      );
+
+      return respuesta;
+
+    } catch (error) {
+
+      console.error('[LOGIN] Error:', error);
 
       return {
-
         success: false,
-
-        message: 'Datos de acceso inválidos.'
-
+        message: 'Error interno al validar las credenciales.'
       };
 
     }
-
-    return autenticarUsuario(
-      credentials.usuario,
-      credentials.contrasena
-    );
 
   }
 );
