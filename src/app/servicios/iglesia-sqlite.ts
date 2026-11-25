@@ -810,55 +810,82 @@ if (Number(registro.activo) !== 1) {
   };
 }
 
-  try {
-    const passwordBytes = new TextEncoder().encode(contrasena);
-    const saltBytes = this.hexABytes(registro.salt);
+  
+try {
+  const passwordBytes = new TextEncoder().encode(contrasena);
+  const saltTexto = String(registro.salt);
+  const hashGuardado = String(registro.password_hash).toLowerCase();
 
-    // Los mismos parámetros utilizados por Node.js:
-    // crypto.scryptSync(password, salt, 64)
+  // Primera posibilidad: Windows utilizó el salt como texto UTF-8.
+  const saltComoTexto = new TextEncoder().encode(saltTexto);
 
-    const hashCalculado = await scrypt(
+  const hashTexto = await scrypt(
+    passwordBytes,
+    saltComoTexto,
+    16384,
+    8,
+    1,
+    64
+  );
+
+  const hashTextoHex = this.bytesAHex(hashTexto);
+
+  let coincide = this.compararHashes(
+    hashGuardado,
+    hashTextoHex
+  );
+
+  // Segunda posibilidad: Windows utilizó el salt
+  // convertido desde hexadecimal a bytes.
+  if (
+    !coincide &&
+    /^[0-9a-f]+$/i.test(saltTexto) &&
+    saltTexto.length % 2 === 0
+  ) {
+    const saltComoBytes = this.hexABytes(saltTexto);
+
+    const hashBytes = await scrypt(
       passwordBytes,
-      saltBytes,
+      saltComoBytes,
       16384,
       8,
       1,
       64
     );
 
-    const hashIngresado = this.bytesAHex(hashCalculado);
-    const hashGuardado = String(registro.password_hash).toLowerCase();
+    const hashBytesHex = this.bytesAHex(hashBytes);
 
-    if (!this.compararHashes(hashGuardado, hashIngresado)) {
-  console.log('Diagnóstico de autenticación:', {
-    usuarioEncontrado: true,
-    activo: registro.activo,
-    longitudHashGuardado: hashGuardado.length,
-    longitudHashCalculado: hashIngresado.length,
-    longitudSalt: registro.salt.length
-  });
+    coincide = this.compararHashes(
+      hashGuardado,
+      hashBytesHex
+    );
+  }
+
+  if (!coincide) {
+    return {
+      success: false,
+      message: 'El usuario existe, pero la contraseña no coincide con el registro importado.'
+    };
+  }
 
   return {
-    success: false,
-    message: 'El usuario existe, pero la contraseña no coincide con el registro importado.'
+    success: true,
+    user: {
+      id: registro.id,
+      usuario: registro.usuario,
+      nombre: registro.nombre_completo,
+      rol: registro.rol
+    }
   };
+
+} catch (error) {
+  console.error('Error al verificar contraseña:', error);
+
+  throw new Error(
+    'No fue posible verificar las credenciales.'
+  );
 }
 
-    return {
-      success: true,
-      user: {
-        id: registro.id,
-        usuario: registro.usuario,
-        nombre: registro.nombre_completo,
-        rol: registro.rol
-      }
-    };
-
-  } catch (error) {
-    console.error('Error al verificar contraseña:', error);
-
-    throw new Error('No fue posible verificar las credenciales.');
-  }
 }
 
 
