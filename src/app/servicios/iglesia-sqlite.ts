@@ -597,7 +597,11 @@ async importarRespaldo(contenido: string): Promise<any> {
   // Iniciar transacción: todos los datos se importan
   // o ninguno se importa.
 
-  await this.conexion.execute('BEGIN TRANSACTION;');
+
+  // Iniciar transacción: todos los datos se importan
+  // o ninguno se importa.
+
+  await this.conexion.beginTransaction();
 
   try {
 
@@ -616,8 +620,6 @@ async importarRespaldo(contenido: string): Promise<any> {
 
       const filas = respaldo.tablas[nombre];
 
-      // Obtener columnas reales de la tabla móvil.
-
       const estructura = await this.conexion.query(
         `PRAGMA table_info("${nombre}")`
       );
@@ -634,25 +636,20 @@ async importarRespaldo(contenido: string): Promise<any> {
         );
       }
 
-      // Evitar pérdida silenciosa de información.
-
       for (const fila of filas) {
-
         for (const campo of Object.keys(fila)) {
-
           if (!columnasDisponibles.has(campo)) {
             throw new Error(
               `El campo ${campo} de ${nombre} no existe en la base móvil.`
             );
           }
-
         }
-
       }
 
       if (nombre === 'configuracion_parroquial') {
         await this.conexion.execute(
-          'DELETE FROM configuracion_parroquial;'
+          'DELETE FROM configuracion_parroquial;',
+          false
         );
       }
 
@@ -683,16 +680,14 @@ async importarRespaldo(contenido: string): Promise<any> {
           VALUES (${interrogantes})
         `;
 
-        await this.conexion.run(sql, valores);
-
+        // IMPORTANTE: false evita transacciones anidadas.
+        await this.conexion.run(sql, valores, false);
       }
 
       cantidades[nombre] = filas.length;
-
     }
 
-    // Comprobar que las cantidades insertadas coincidan.
-
+    // Verificar cantidades importadas.
     for (const nombre of ordenTablas) {
 
       const resultado = await this.conexion.query(
@@ -708,28 +703,28 @@ async importarRespaldo(contenido: string): Promise<any> {
           `La verificación de registros falló en ${nombre}.`
         );
       }
-
     }
 
-    await this.conexion.execute('COMMIT;');
+    // Confirmar la transacción.
+    await this.conexion.commitTransaction();
 
     return {
-
       success: true,
-
-      message:
-        'El respaldo se importó correctamente.',
-
+      message: 'El respaldo se importó correctamente.',
       generadoEn: respaldo.generadoEn,
-
       cantidades
-
     };
 
   } catch (error) {
 
+    // Revertir solamente si la transacción sigue activa.
     try {
-      await this.conexion.execute('ROLLBACK;');
+      const estado = await this.conexion.isTransactionActive();
+
+      if (estado.result) {
+        await this.conexion.rollbackTransaction();
+      }
+
     } catch (errorRollback) {
       console.error(
         'Error al revertir importación:',
@@ -738,9 +733,9 @@ async importarRespaldo(contenido: string): Promise<any> {
     }
 
     throw error;
-
   }
 
+   
 }
 
 // =====================================================
