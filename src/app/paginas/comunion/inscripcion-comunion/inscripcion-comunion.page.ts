@@ -1,7 +1,8 @@
-
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
+import { IglesiaSqliteService } from '../../../servicios/iglesia-sqlite';
 
 @Component({
   selector: 'app-inscripcion-comunion',
@@ -64,11 +65,40 @@ export class InscripcionComunionPage implements OnInit {
     private alertController: AlertController,
     private router: Router,
     private ngZone: NgZone,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private iglesiaSqlite: IglesiaSqliteService
   ) {}
 
   ngOnInit(): void {
     this.cargarParrocoVigente();
+  }
+
+  // =====================================================
+  // IDENTIFICAR PLATAFORMA
+  // =====================================================
+
+  private esIOS(): boolean {
+    return Capacitor.isNativePlatform();
+  }
+
+  // =====================================================
+  // NORMALIZAR RESULTADOS SQLITE
+  // =====================================================
+
+  private obtenerFilas(resultado: any): any[] {
+    if (Array.isArray(resultado)) {
+      return resultado;
+    }
+
+    if (Array.isArray(resultado?.values)) {
+      return resultado.values;
+    }
+
+    if (Array.isArray(resultado?.rows)) {
+      return resultado.rows;
+    }
+
+    return [];
   }
 
   // =====================================================
@@ -82,15 +112,29 @@ export class InscripcionComunionPage implements OnInit {
 
     try {
 
-      const api = (window as any).iglesia;
+      let resultado: any;
 
-      if (!api?.parroco?.obtener) {
-        throw new Error(
-          'No se encuentra disponible la conexión con la base de datos.'
+      if (this.esIOS()) {
+
+        const consulta = await this.iglesiaSqlite.consultar(
+          'SELECT * FROM configuracion_parroquial WHERE id = 1 LIMIT 1',
+          []
         );
-      }
 
-      const resultado = await api.parroco.obtener();
+        resultado = this.obtenerFilas(consulta)[0];
+
+      } else {
+
+        const api = (window as any).iglesia;
+
+        if (!api?.parroco?.obtener) {
+          throw new Error(
+            'No se encuentra disponible la conexión con la base de datos.'
+          );
+        }
+
+        resultado = await api.parroco.obtener();
+      }
 
       if (!resultado) {
         throw new Error(
@@ -151,129 +195,152 @@ export class InscripcionComunionPage implements OnInit {
   }
 
   // =====================================================
-// BUSCAR BAUTISMO POR CÉDULA
-// =====================================================
+  // BUSCAR BAUTISMO POR CÉDULA
+  // =====================================================
 
-async buscarBautismo(): Promise<void> {
+  async buscarBautismo(): Promise<void> {
 
-  if (this.buscandoBautismo) {
-    return;
-  }
-
-  const cedula = this.comunion.cedula.trim();
-
-  if (!cedula) {
-    await this.mostrarAlerta(
-      'Cédula requerida',
-      'Ingrese el número de cédula para buscar el registro de bautismo.'
-    );
-    return;
-  }
-
-  this.buscandoBautismo = true;
-  this.mensajeError = '';
-  this.bautismoEncontrado = null;
-
-  try {
-
-    const api = (window as any).iglesia;
-
-    if (!api?.bautizos?.buscarPorCedula) {
-      throw new Error(
-        'La búsqueda de bautismos no está disponible. Verifique preload.cjs.'
-      );
+    if (this.buscandoBautismo) {
+      return;
     }
 
-    const resultado = await api.bautizos.buscarPorCedula(cedula);
+    const cedula = this.comunion.cedula.trim();
 
-    if (!resultado?.success) {
-      throw new Error(
-        resultado?.message || 'No se pudo realizar la búsqueda.'
+    if (!cedula) {
+      await this.mostrarAlerta(
+        'Cédula requerida',
+        'Ingrese el número de cédula para buscar el registro de bautismo.'
       );
+      return;
     }
 
-    this.ngZone.run(() => {
+    this.buscandoBautismo = true;
+    this.mensajeError = '';
+    this.bautismoEncontrado = null;
 
-      if (resultado.encontrado && resultado.bautismo) {
+    try {
 
-        const bautismo = resultado.bautismo;
+      let bautismo: any = null;
 
-        // DATOS PERSONALES DEL NIÑO
-        this.comunion.nombres =
-          bautismo.nombres_bautizado || '';
+      if (this.esIOS()) {
 
-        this.comunion.apellidos =
-          bautismo.apellidos_bautizado || '';
+        const consulta = await this.iglesiaSqlite.consultar(
+          `SELECT *
+           FROM bautizos
+           WHERE cedula = ?
+           ORDER BY id DESC
+           LIMIT 1`,
+          [cedula]
+        );
 
-        this.comunion.lugar_nacimiento =
-          bautismo.lugar_nacimiento || '';
-
-        this.comunion.fecha_nacimiento =
-          bautismo.fecha_nacimiento || '';
-
-        // DATOS DE LOS PADRES
-        this.comunion.nombre_padre =
-          bautismo.nombre_padre || '';
-
-        this.comunion.nombre_madre =
-          bautismo.nombre_madre || '';
-
-        // DATOS DEL BAUTISMO
-        this.comunion.parroquia_bautismo =
-          bautismo.lugar_bautizo || '';
-
-        this.comunion.fecha_bautismo =
-          bautismo.fecha_bautizo || '';
-
-        // DATOS DE PADRINOS (si existen)
-        this.comunion.padrino =
-          bautismo.padrino || '';
-
-        this.comunion.madrina =
-          bautismo.madrina || '';
-
-        this.bautismoEncontrado = true;
+        bautismo = this.obtenerFilas(consulta)[0] || null;
 
       } else {
 
-        // No se encontró: permitir ingreso manual.
-        this.comunion.nombres = '';
-        this.comunion.apellidos = '';
-        this.comunion.lugar_nacimiento = '';
-        this.comunion.fecha_nacimiento = '';
+        const api = (window as any).iglesia;
 
-        this.comunion.nombre_padre = '';
-        this.comunion.nombre_madre = '';
+        if (!api?.bautizos?.buscarPorCedula) {
+          throw new Error(
+            'La búsqueda de bautismos no está disponible. Verifique preload.cjs.'
+          );
+        }
 
-        this.comunion.parroquia_bautismo = '';
-        this.comunion.fecha_bautismo = '';
+        const resultado = await api.bautizos.buscarPorCedula(cedula);
 
-        this.bautismoEncontrado = false;
+        if (!resultado?.success) {
+          throw new Error(
+            resultado?.message || 'No se pudo realizar la búsqueda.'
+          );
+        }
 
+        if (resultado.encontrado && resultado.bautismo) {
+          bautismo = resultado.bautismo;
+        }
       }
 
+      this.ngZone.run(() => {
+
+        if (bautismo) {
+
+          // DATOS PERSONALES
+          this.comunion.nombres =
+            bautismo.nombres_bautizado || '';
+
+          this.comunion.apellidos =
+            bautismo.apellidos_bautizado || '';
+
+          this.comunion.lugar_nacimiento =
+            bautismo.lugar_nacimiento || '';
+
+          this.comunion.fecha_nacimiento =
+            bautismo.fecha_nacimiento || '';
+
+          // DATOS DE LOS PADRES
+          this.comunion.nombre_padre =
+            bautismo.nombre_padre || '';
+
+          this.comunion.nombre_madre =
+            bautismo.nombre_madre || '';
+
+          // DATOS DEL BAUTISMO
+          this.comunion.parroquia_bautismo =
+            bautismo.lugar_bautizo || '';
+
+          this.comunion.fecha_bautismo =
+            bautismo.fecha_bautizo || '';
+
+          // DATOS DE PADRINOS
+          this.comunion.padrino =
+            bautismo.padrino || '';
+
+          this.comunion.madrina =
+            bautismo.madrina || '';
+
+          this.bautismoEncontrado = true;
+
+        } else {
+
+          // PERMITIR INGRESO MANUAL
+          this.comunion.nombres = '';
+          this.comunion.apellidos = '';
+          this.comunion.lugar_nacimiento = '';
+          this.comunion.fecha_nacimiento = '';
+
+          this.comunion.nombre_padre = '';
+          this.comunion.nombre_madre = '';
+
+          this.comunion.parroquia_bautismo = '';
+          this.comunion.fecha_bautismo = '';
+
+          this.comunion.padrino = '';
+          this.comunion.madrina = '';
+
+          this.bautismoEncontrado = false;
+
+        }
+
+        this.cdr.detectChanges();
+
+      });
+
+    } catch (error: any) {
+
+      console.error(
+        'Error al buscar bautismo:',
+        error
+      );
+
+      this.mensajeError =
+        error?.message ||
+        'Ocurrió un error al consultar el registro de bautismo.';
+
+    } finally {
+
+      this.buscandoBautismo = false;
       this.cdr.detectChanges();
 
-    });
-
-  } catch (error: any) {
-
-    console.error(
-      'Error al buscar bautismo:',
-      error
-    );
-
-    this.mensajeError =
-      error?.message ||
-      'Ocurrió un error al consultar el registro de bautismo.';
-
-  } finally {
-
-    this.buscandoBautismo = false;
-    this.cdr.detectChanges();
-
+    }
   }
-}
 
   // =====================================================
   // VALIDAR FORMULARIO
@@ -405,14 +472,6 @@ async buscarBautismo(): Promise<void> {
 
     try {
 
-      const api = (window as any).iglesia;
-
-      if (!api?.comuniones?.guardar) {
-        throw new Error(
-          'No se encuentra disponible la función para guardar Primera Comunión.'
-        );
-      }
-
       const datos = {
 
         numero_comunion:
@@ -468,20 +527,131 @@ async buscarBautismo(): Promise<void> {
 
       };
 
-      const resultado = await api.comuniones.guardar(datos);
+      let idGuardado: number;
 
-      if (!resultado?.success) {
-        throw new Error(
-          resultado?.message ||
-          'No se pudo guardar la Primera Comunión.'
+      if (this.esIOS()) {
+
+        // VERIFICAR NÚMERO DUPLICADO
+        const duplicado = await this.iglesiaSqlite.consultar(
+          `SELECT id
+           FROM comuniones
+           WHERE numero_comunion = ?
+           LIMIT 1`,
+          [datos.numero_comunion]
         );
+
+        if (this.obtenerFilas(duplicado).length > 0) {
+          throw new Error(
+            'Ya existe una Primera Comunión registrada con ese número.'
+          );
+        }
+
+        // INSERTAR DIRECTAMENTE EN SQLITE
+        const resultado: any = await this.iglesiaSqlite.ejecutarCambios(
+          `INSERT INTO comuniones (
+            numero_comunion,
+            fecha_comunion,
+            tomo_comunion,
+            pagina_comunion,
+            lugar_comunion,
+            ministro,
+            cedula,
+            nombres,
+            apellidos,
+            lugar_nacimiento,
+            fecha_nacimiento,
+            parroquia_bautismo,
+            fecha_bautismo,
+            nombre_padre,
+            nombre_madre,
+            padrino,
+            madrina,
+            parroco_nombre,
+            pie_firma,
+            parroco_firma_data,
+            parroco_firma_tipo,
+            fecha_creacion,
+            fecha_actualizacion
+          ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, datetime('now','localtime'),
+            datetime('now','localtime')
+          )`,
+          [
+            datos.numero_comunion,
+            datos.fecha_comunion,
+            datos.tomo_comunion,
+            datos.pagina_comunion,
+            datos.lugar_comunion,
+            datos.ministro,
+            datos.cedula,
+            datos.nombres,
+            datos.apellidos,
+            datos.lugar_nacimiento,
+            datos.fecha_nacimiento,
+            datos.parroquia_bautismo,
+            datos.fecha_bautismo,
+            datos.nombre_padre,
+            datos.nombre_madre,
+            datos.padrino,
+            datos.madrina,
+            this.parroco.nombre,
+            this.parroco.pieFirma,
+            this.parroco.firmaData,
+            this.parroco.firmaTipo
+          ]
+        );
+
+        idGuardado =
+          resultado?.lastId ||
+          resultado?.lastInsertRowId ||
+          resultado?.changes?.lastId ||
+          0;
+
+        if (!idGuardado) {
+
+          const ultimaConsulta = await this.iglesiaSqlite.consultar(
+            'SELECT last_insert_rowid() AS id',
+            []
+          );
+
+          idGuardado =
+            Number(this.obtenerFilas(ultimaConsulta)[0]?.id) || 0;
+        }
+
+        if (!idGuardado) {
+          throw new Error(
+            'La comunión se guardó, pero no se pudo recuperar su número de registro.'
+          );
+        }
+
+      } else {
+
+        // WINDOWS / ELECTRON
+        const api = (window as any).iglesia;
+
+        if (!api?.comuniones?.guardar) {
+          throw new Error(
+            'No se encuentra disponible la función para guardar Primera Comunión.'
+          );
+        }
+
+        const resultado = await api.comuniones.guardar(datos);
+
+        if (!resultado?.success) {
+          throw new Error(
+            resultado?.message ||
+            'No se pudo guardar la Primera Comunión.'
+          );
+        }
+
+        idGuardado = Number(resultado.id);
       }
 
       this.ngZone.run(() => {
 
-        this.comunionId = resultado.id;
+        this.comunionId = idGuardado;
         this.comunionGuardada = true;
-
         this.mensajeError = '';
 
         this.cdr.detectChanges();
@@ -490,7 +660,7 @@ async buscarBautismo(): Promise<void> {
 
       await this.mostrarAlerta(
         'Registro completado',
-        `La Primera Comunión se registró correctamente.\nNúmero de registro: ${resultado.id}`
+        `La Primera Comunión se registró correctamente.\nNúmero de registro: ${idGuardado}`
       );
 
     } catch (error: any) {

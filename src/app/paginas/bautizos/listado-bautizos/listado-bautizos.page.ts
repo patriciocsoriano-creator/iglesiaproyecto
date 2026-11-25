@@ -6,6 +6,7 @@ import {
 
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { IglesiaSqliteService } from '../../../servicios/iglesia-sqlite';
 
 @Component({
   selector: 'app-listado-bautizos',
@@ -58,10 +59,27 @@ selloParroquiaTipo: ''
   };
 
   constructor(
-    private alertController: AlertController,
-    private router: Router,
-    private changeDetector: ChangeDetectorRef
-  ) {}
+  private alertController: AlertController,
+  private router: Router,
+  private changeDetector: ChangeDetectorRef,
+  private sqlite: IglesiaSqliteService
+) {}
+
+private esMovil(): boolean {
+  return this.sqlite.esDispositivoMovil();
+}
+
+private obtenerFilas(resultado: any): any[] {
+  if (Array.isArray(resultado)) {
+    return resultado;
+  }
+
+  if (Array.isArray(resultado?.values)) {
+    return resultado.values;
+  }
+
+  return [];
+}
 
   async ngOnInit(): Promise<void> {
     await this.cargarBautizos();
@@ -72,44 +90,67 @@ selloParroquiaTipo: ''
   // =====================================================
 
   async cargarBautizos(): Promise<void> {
+  this.cargando = true;
+  this.mensajeError = '';
 
-    this.cargando = true;
-    this.mensajeError = '';
+  try {
+    const busqueda = this.busqueda.trim();
 
-    try {
+    if (this.esMovil()) {
+
+      const termino = `%${busqueda}%`;
+
+      const resultado = await this.sqlite.consultar(
+        `SELECT *
+         FROM bautizos
+         WHERE
+           ? = ''
+           OR CAST(numero_bautizo AS TEXT) LIKE ?
+           OR nombres_bautizado LIKE ?
+           OR apellidos_bautizado LIKE ?
+           OR cedula LIKE ?
+         ORDER BY id DESC`,
+        [
+          busqueda,
+          termino,
+          termino,
+          termino,
+          termino
+        ]
+      );
+
+      this.bautizos = this.obtenerFilas(resultado);
+
+    } else {
 
       const api = (window as any).iglesia;
 
       if (!api?.bautizos?.listar) {
         throw new Error(
-          'No está disponible la conexión con SQLite.'
+          'No está disponible el servicio de bautizos de Electron.'
         );
       }
 
-      const resultado = await api.bautizos.listar(
-        this.busqueda.trim()
-      );
+      const resultado = await api.bautizos.listar(busqueda);
 
       if (!Array.isArray(resultado)) {
         throw new Error('La respuesta del listado no es válida.');
       }
 
       this.bautizos = resultado;
-
-    } catch (error: any) {
-
-      console.error('Error al cargar bautizos:', error);
-
-      this.mensajeError =
-        error?.message || 'No se pudieron cargar los bautizos.';
-
-    } finally {
-
-      this.cargando = false;
-      this.changeDetector.detectChanges();
-
     }
+
+  } catch (error: any) {
+    console.error('Error al cargar bautizos:', error);
+
+    this.mensajeError =
+      error?.message || 'No se pudieron cargar los bautizos.';
+
+  } finally {
+    this.cargando = false;
+    this.changeDetector.detectChanges();
   }
+}
 
   // =====================================================
   // BUSCADOR
@@ -125,11 +166,36 @@ selloParroquiaTipo: ''
   // =====================================================
 
   async verDetalle(id: number): Promise<void> {
+  this.consultandoDetalle = true;
+  this.bautizoSeleccionado = null;
 
-    this.consultandoDetalle = true;
-    this.bautizoSeleccionado = null;
+  try {
+    let bautizo: any;
+    let parroco: any;
+    let identidad: any;
 
-    try {
+    if (this.esMovil()) {
+
+      const resultadoBautizo = await this.sqlite.consultar(
+        'SELECT * FROM bautizos WHERE id = ? LIMIT 1',
+        [id]
+      );
+
+      const filasBautizo = this.obtenerFilas(resultadoBautizo);
+
+      bautizo = filasBautizo[0];
+
+      const resultadoParroco = await this.sqlite.consultar(
+        'SELECT * FROM configuracion_parroquial WHERE id = 1 LIMIT 1',
+        []
+      );
+
+      const filasParroco = this.obtenerFilas(resultadoParroco);
+
+      parroco = filasParroco[0] || {};
+      identidad = parroco;
+
+    } else {
 
       const api = (window as any).iglesia;
 
@@ -139,81 +205,80 @@ selloParroquiaTipo: ''
         );
       }
 
-      const [bautizo, parroco] = await Promise.all([
+      const [resultadoBautizo, resultadoParroco] = await Promise.all([
         api.bautizos.obtener(id),
         api.parroco.obtener()
       ]);
 
-      if (!bautizo) {
-        throw new Error('No se encontró el bautismo solicitado.');
-      }
-
-      const identidad = parroco?.identidad || parroco || {};
-
-      this.parrocoVigente = {
-        nombre: parroco?.parroco_nombre || '',
-        pieFirma: parroco?.pie_firma || 'Párroco',
-        firmaData: parroco?.parroco_firma_data || '',
-        firmaTipo: parroco?.parroco_firma_tipo || '',
-        firmaPreview: '',
-
-        diocesisNombre:
-          identidad.diocesis_nombre || 'Diócesis de Santa Elena',
-
-        vicariaNombre:
-          identidad.vicaria_nombre || 'Vicaría “San José”',
-
-        parroquiaNombre:
-          identidad.parroquia_nombre || 'Parroquia “San Rafael Arcángel”',
-
-        logoDiocesisData:
-          identidad.logo_diocesis_data || '',
-
-        logoDiocesisTipo:
-          identidad.logo_diocesis_tipo || '',
-
-        logoParroquiaData:
-          identidad.logo_parroquia_data || '',
-
-        logoParroquiaTipo:
-          identidad.logo_parroquia_tipo || '',
-
-        selloParroquiaData:
-  identidad.sello_parroquia_data || '',
-
-selloParroquiaTipo:
-  identidad.sello_parroquia_tipo || ''
-      };
-
-      if (
-        this.parrocoVigente.firmaData &&
-        this.parrocoVigente.firmaTipo
-      ) {
-        this.parrocoVigente.firmaPreview =
-          this.crearDataUrl(
-            this.parrocoVigente.firmaData,
-            this.parrocoVigente.firmaTipo
-          );
-      }
-
-      this.bautizoSeleccionado = bautizo;
-
-    } catch (error: any) {
-
-      console.error('Error al consultar bautizo:', error);
-
-      await this.mostrarAlerta(
-        'Error de consulta',
-        error?.message || 'No se pudo consultar el bautismo.'
-      );
-
-    } finally {
-
-      this.consultandoDetalle = false;
-      this.changeDetector.detectChanges();
-
+      bautizo = resultadoBautizo;
+      parroco = resultadoParroco;
+      identidad = parroco?.identidad || parroco || {};
     }
+
+    if (!bautizo) {
+      throw new Error('No se encontró el bautismo solicitado.');
+    }
+
+    this.parrocoVigente = {
+      nombre: parroco?.parroco_nombre || '',
+      pieFirma: parroco?.pie_firma || 'Párroco',
+      firmaData: parroco?.parroco_firma_data || '',
+      firmaTipo: parroco?.parroco_firma_tipo || '',
+      firmaPreview: '',
+
+      diocesisNombre:
+        identidad?.diocesis_nombre || 'Diócesis de Santa Elena',
+
+      vicariaNombre:
+        identidad?.vicaria_nombre || 'Vicaría “San José”',
+
+      parroquiaNombre:
+        identidad?.parroquia_nombre || 'Parroquia “San Rafael Arcángel”',
+
+      logoDiocesisData:
+        identidad?.logo_diocesis_data || '',
+
+      logoDiocesisTipo:
+        identidad?.logo_diocesis_tipo || '',
+
+      logoParroquiaData:
+        identidad?.logo_parroquia_data || '',
+
+      logoParroquiaTipo:
+        identidad?.logo_parroquia_tipo || '',
+
+      selloParroquiaData:
+        identidad?.sello_parroquia_data || '',
+
+      selloParroquiaTipo:
+        identidad?.sello_parroquia_tipo || ''
+    };
+
+    if (
+      this.parrocoVigente.firmaData &&
+      this.parrocoVigente.firmaTipo
+    ) {
+      this.parrocoVigente.firmaPreview = this.crearDataUrl(
+        this.parrocoVigente.firmaData,
+        this.parrocoVigente.firmaTipo
+      );
+    }
+
+    this.bautizoSeleccionado = bautizo;
+
+  } catch (error: any) {
+    console.error('Error al consultar bautizo:', error);
+
+    await this.mostrarAlerta(
+      'Error de consulta',
+      error?.message || 'No se pudo consultar el bautismo.'
+    );
+
+  } finally {
+    this.consultandoDetalle = false;
+    this.changeDetector.detectChanges();
   }
+}
 
   // =====================================================
   // CERRAR DETALLE
@@ -1571,7 +1636,6 @@ async guardarCambios(): Promise<void> {
 
   const b = this.bautizoEdicion;
 
-  // Validación de campos obligatorios
   const obligatorios = [
     { campo: 'numero_bautizo', nombre: 'Número de bautizo' },
     { campo: 'fecha_bautizo', nombre: 'Fecha del bautizo' },
@@ -1583,14 +1647,11 @@ async guardarCambios(): Promise<void> {
   ];
 
   for (const elemento of obligatorios) {
-
     if (!String(b[elemento.campo] ?? '').trim()) {
-
       await this.mostrarAlerta(
         'Campo obligatorio',
         `Debes completar el campo: ${elemento.nombre}.`
       );
-
       return;
     }
   }
@@ -1598,18 +1659,6 @@ async guardarCambios(): Promise<void> {
   this.guardandoCambios = true;
 
   try {
-
-    const api = (window as any).iglesia;
-
-    if (!api?.bautizos?.actualizar) {
-      throw new Error(
-        'No está disponible el servicio de actualización de bautizos.'
-      );
-    }
-
-    // Se envían exclusivamente los campos editables.
-    // No se envían parroco_nombre ni pie_firma:
-    // la firma histórica debe permanecer intacta.
 
     const datos = {
       id: b.id,
@@ -1641,12 +1690,76 @@ async guardarCambios(): Promise<void> {
       nota_marginal: String(b.nota_marginal ?? '').trim()
     };
 
-    const resultado = await api.bautizos.actualizar(datos);
+    if (this.esMovil()) {
 
-    if (!resultado?.success) {
-      throw new Error(
-        resultado?.message || 'No se pudo actualizar el bautismo.'
+      await this.sqlite.ejecutarCambios(
+        `UPDATE bautizos SET
+          numero_bautizo = ?,
+          fecha_bautizo = ?,
+          tomo_bautizo = ?,
+          pagina_bautizo = ?,
+          lugar_bautizo = ?,
+          ministro = ?,
+          nombres_bautizado = ?,
+          apellidos_bautizado = ?,
+          lugar_nacimiento = ?,
+          fecha_nacimiento = ?,
+          nombre_padre = ?,
+          nombre_madre = ?,
+          padrino = ?,
+          madrina = ?,
+          cedula = ?,
+          anio_registro = ?,
+          tomo_registro = ?,
+          pagina_registro = ?,
+          acta_registro = ?,
+          lugar_registro = ?,
+          nota_marginal = ?,
+          fecha_actualizacion = datetime('now','localtime')
+        WHERE id = ?`,
+        [
+          datos.numero_bautizo,
+          datos.fecha_bautizo,
+          datos.tomo_bautizo,
+          datos.pagina_bautizo,
+          datos.lugar_bautizo,
+          datos.ministro,
+          datos.nombres_bautizado,
+          datos.apellidos_bautizado,
+          datos.lugar_nacimiento,
+          datos.fecha_nacimiento,
+          datos.nombre_padre,
+          datos.nombre_madre,
+          datos.padrino,
+          datos.madrina,
+          datos.cedula,
+          datos.anio_registro,
+          datos.tomo_registro,
+          datos.pagina_registro,
+          datos.acta_registro,
+          datos.lugar_registro,
+          datos.nota_marginal,
+          datos.id
+        ]
       );
+
+    } else {
+
+      const api = (window as any).iglesia;
+
+      if (!api?.bautizos?.actualizar) {
+        throw new Error(
+          'No está disponible el servicio de actualización de bautizos.'
+        );
+      }
+
+      const resultado = await api.bautizos.actualizar(datos);
+
+      if (!resultado?.success) {
+        throw new Error(
+          resultado?.message || 'No se pudo actualizar el bautismo.'
+        );
+      }
     }
 
     const idActualizado = Number(b.id);
@@ -1654,10 +1767,7 @@ async guardarCambios(): Promise<void> {
     this.editandoBautizo = false;
     this.bautizoEdicion = null;
 
-    // Actualizar tabla y conservar el filtro de búsqueda.
     await this.cargarBautizos();
-
-    // Consultar nuevamente el registro actualizado.
     await this.verDetalle(idActualizado);
 
     await this.mostrarAlerta(
@@ -1666,11 +1776,7 @@ async guardarCambios(): Promise<void> {
     );
 
   } catch (error: any) {
-
-    console.error(
-      'Error al actualizar bautizo:',
-      error
-    );
+    console.error('Error al actualizar bautizo:', error);
 
     await this.mostrarAlerta(
       'Error al actualizar',
@@ -1678,10 +1784,8 @@ async guardarCambios(): Promise<void> {
     );
 
   } finally {
-
     this.guardandoCambios = false;
     this.changeDetector.detectChanges();
-
   }
 }
 

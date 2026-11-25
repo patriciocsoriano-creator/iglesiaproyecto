@@ -1,6 +1,8 @@
 import { Component, OnInit, ChangeDetectorRef, NgZone } from '@angular/core';
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
+import { IglesiaSqliteService } from '../../../servicios/iglesia-sqlite';
 
 @Component({
   selector: 'app-registro-confirmacion',
@@ -44,16 +46,13 @@ export class RegistroConfirmacionPage implements OnInit {
     pagina_confirmacion: '',
     lugar_confirmacion: '',
     ministro: '',
-
     cedula: '',
     nombres: '',
     apellidos: '',
     lugar_nacimiento: '',
     fecha_nacimiento: '',
-
     parroquia_bautismo: '',
     fecha_bautismo: '',
-
     nombre_padre: '',
     nombre_madre: '',
     nombre_padrino: '',
@@ -64,11 +63,32 @@ export class RegistroConfirmacionPage implements OnInit {
     private alertController: AlertController,
     private router: Router,
     private cdr: ChangeDetectorRef,
-    private zone: NgZone
+    private zone: NgZone,
+    private iglesiaSqlite: IglesiaSqliteService
   ) {}
 
   ngOnInit(): void {
     this.cargarParrocoVigente();
+  }
+
+  private esIOS(): boolean {
+    return Capacitor.isNativePlatform();
+  }
+
+  private obtenerFilas(resultado: any): any[] {
+    if (Array.isArray(resultado)) {
+      return resultado;
+    }
+
+    if (Array.isArray(resultado?.values)) {
+      return resultado.values;
+    }
+
+    if (Array.isArray(resultado?.rows)) {
+      return resultado.rows;
+    }
+
+    return [];
   }
 
   // ==========================================
@@ -80,29 +100,47 @@ export class RegistroConfirmacionPage implements OnInit {
     this.mensajeError = '';
 
     try {
-      const resultado = await (window as any).iglesia.parroco.obtener();
+      let resultado: any;
 
-      this.zone.run(() => {
-        if (resultado) {
-          this.parroco.nombre = resultado.parroco_nombre || '';
-          this.parroco.pieFirma = resultado.pie_firma || 'Párroco';
-          this.parroco.firmaData = resultado.parroco_firma_data || '';
-          this.parroco.firmaTipo = resultado.parroco_firma_tipo || '';
+      if (this.esIOS()) {
+        const consulta = await this.iglesiaSqlite.consultar(
+          'SELECT * FROM configuracion_parroquial WHERE id = 1 LIMIT 1',
+          []
+        );
 
-          this.actualizarVistaFirma();
-        } else {
-          this.mensajeError = 'No se encontró la configuración del párroco.';
+        resultado = this.obtenerFilas(consulta)[0];
+      } else {
+        const api = (window as any).iglesia;
+
+        if (!api?.parroco?.obtener) {
+          throw new Error('No se encuentra disponible la conexión con la base de datos.');
         }
 
+        resultado = await api.parroco.obtener();
+      }
+
+      if (!resultado) {
+        throw new Error('No se encontró la configuración del párroco.');
+      }
+
+      this.zone.run(() => {
+        this.parroco.nombre = resultado.parroco_nombre || '';
+        this.parroco.pieFirma = resultado.pie_firma || 'Párroco';
+        this.parroco.firmaData = resultado.parroco_firma_data || '';
+        this.parroco.firmaTipo = resultado.parroco_firma_tipo || '';
+
+        this.actualizarVistaFirma();
         this.cargandoParroco = false;
         this.cdr.detectChanges();
       });
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error al cargar el párroco:', error);
 
       this.zone.run(() => {
-        this.mensajeError = 'No fue posible cargar los datos del párroco.';
+        this.mensajeError =
+          error?.message || 'No fue posible cargar los datos del párroco.';
+
         this.cargandoParroco = false;
         this.cdr.detectChanges();
       });
@@ -115,14 +153,10 @@ export class RegistroConfirmacionPage implements OnInit {
       return;
     }
 
-    if (this.parroco.firmaData.startsWith('data:image')) {
-      this.parroco.firmaPreview = this.parroco.firmaData;
-    } else {
-      const tipo = this.parroco.firmaTipo || 'png';
-
-      this.parroco.firmaPreview =
-        `data:image/${tipo};base64,${this.parroco.firmaData}`;
-    }
+    this.parroco.firmaPreview =
+      this.parroco.firmaData.startsWith('data:image')
+        ? this.parroco.firmaData
+        : `data:${this.parroco.firmaTipo || 'image/png'};base64,${this.parroco.firmaData}`;
   }
 
   // ==========================================
@@ -130,6 +164,10 @@ export class RegistroConfirmacionPage implements OnInit {
   // ==========================================
 
   async buscarAntecedentesConfirmacion(): Promise<void> {
+    if (this.buscandoAntecedentes) {
+      return;
+    }
+
     const cedula = this.confirmacion.cedula.trim();
 
     if (!cedula) {
@@ -153,21 +191,41 @@ export class RegistroConfirmacionPage implements OnInit {
     this.comunionEncontrada = null;
 
     try {
-      const resultado = await (window as any).iglesia.confirmaciones.buscarAntecedentes(cedula);
+      let bautismo: any = null;
+      let comunion: any = null;
 
-      this.zone.run(async () => {
-        if (!resultado || !resultado.success) {
-          this.bautismoEncontrado = false;
-          this.comunionEncontrada = false;
+      if (this.esIOS()) {
+        const consultaBautismo = await this.iglesiaSqlite.consultar(
+          `SELECT * FROM bautizos
+           WHERE cedula = ?
+           ORDER BY id DESC LIMIT 1`,
+          [cedula]
+        );
 
-          await this.mostrarAlerta(
-            'Consulta realizada',
-            resultado?.message || 'No fue posible consultar los antecedentes sacramentales.'
+        const consultaComunion = await this.iglesiaSqlite.consultar(
+          `SELECT * FROM comuniones
+           WHERE cedula = ?
+           ORDER BY id DESC LIMIT 1`,
+          [cedula]
+        );
+
+        bautismo = this.obtenerFilas(consultaBautismo)[0] || null;
+        comunion = this.obtenerFilas(consultaComunion)[0] || null;
+
+      } else {
+        const api = (window as any).iglesia;
+
+        if (!api?.confirmaciones?.buscarAntecedentes) {
+          throw new Error('La búsqueda de antecedentes no está disponible en Windows.');
+        }
+
+        const resultado =
+          await api.confirmaciones.buscarAntecedentes(cedula);
+
+        if (!resultado?.success) {
+          throw new Error(
+            resultado?.message || 'No fue posible consultar los antecedentes.'
           );
-
-          this.buscandoAntecedentes = false;
-          this.cdr.detectChanges();
-          return;
         }
 
         this.bautismoEncontrado = !!resultado.bautismoEncontrado;
@@ -175,78 +233,128 @@ export class RegistroConfirmacionPage implements OnInit {
 
         const datos = resultado.datos || {};
 
-        // Completar únicamente los datos personales encontrados.
-        // Los padrinos de Confirmación siempre se ingresan manualmente.
-
-        this.confirmacion.nombres =
-          datos.nombres || this.confirmacion.nombres;
-
-        this.confirmacion.apellidos =
-          datos.apellidos || this.confirmacion.apellidos;
-
-        this.confirmacion.lugar_nacimiento =
-          datos.lugar_nacimiento || this.confirmacion.lugar_nacimiento;
-
-        this.confirmacion.fecha_nacimiento =
-          datos.fecha_nacimiento || this.confirmacion.fecha_nacimiento;
-
-        this.confirmacion.parroquia_bautismo =
-          datos.parroquia_bautismo || this.confirmacion.parroquia_bautismo;
-
-        this.confirmacion.fecha_bautismo =
-          datos.fecha_bautismo || this.confirmacion.fecha_bautismo;
-
-        this.confirmacion.nombre_padre =
-          datos.nombre_padre || this.confirmacion.nombre_padre;
-
-        this.confirmacion.nombre_madre =
-          datos.nombre_madre || this.confirmacion.nombre_madre;
-
-        // No recuperar padrino ni madrina de otros sacramentos.
-        this.confirmacion.nombre_padrino = '';
-        this.confirmacion.nombre_madrina = '';
+        this.zone.run(() => {
+          this.completarDatosPersonales(datos);
+          this.cdr.detectChanges();
+        });
 
         this.buscandoAntecedentes = false;
-        this.cdr.detectChanges();
 
         if (this.bautismoEncontrado || this.comunionEncontrada) {
-          let mensaje = 'Se encontraron antecedentes sacramentales.';
-
-          if (this.bautismoEncontrado && this.comunionEncontrada) {
-            mensaje = 'Se encontraron registros de Bautismo y Primera Comunión.';
-          } else if (this.bautismoEncontrado) {
-            mensaje = 'Se encontró un registro de Bautismo. Los demás datos deberán completarse si es necesario.';
-          } else {
-            mensaje = 'Se encontró un registro de Primera Comunión. Los demás datos deberán completarse si es necesario.';
-          }
-
-          await this.mostrarAlerta('Antecedentes encontrados', mensaje);
-
+          await this.mostrarAlerta(
+            'Antecedentes encontrados',
+            'Se encontraron antecedentes sacramentales. Revise los datos completados.'
+          );
         } else {
           await this.mostrarAlerta(
             'Sin antecedentes locales',
-            'No se encontró un registro local de Bautismo ni de Primera Comunión para esta cédula. Esto no significa que la persona no haya recibido estos sacramentos. Puede continuar y completar los datos manualmente.'
+            'No se encontraron registros locales de Bautismo ni de Primera Comunión para esta cédula. Esto no significa que la persona no haya recibido estos sacramentos. Puede completar los datos manualmente.'
           );
         }
 
-        this.cdr.detectChanges();
-      });
+        return;
+      }
 
-    } catch (error) {
+      this.bautismoEncontrado = !!bautismo;
+      this.comunionEncontrada = !!comunion;
+
+      // Se priorizan los datos del bautismo.
+      // Si no existe, se utilizan los datos de la comunión.
+      const fuente = bautismo || comunion;
+
+      if (fuente) {
+        const datos = bautismo
+          ? {
+              nombres: bautismo.nombres_bautizado,
+              apellidos: bautismo.apellidos_bautizado,
+              lugar_nacimiento: bautismo.lugar_nacimiento,
+              fecha_nacimiento: bautismo.fecha_nacimiento,
+              parroquia_bautismo: bautismo.lugar_bautizo,
+              fecha_bautismo: bautismo.fecha_bautizo,
+              nombre_padre: bautismo.nombre_padre,
+              nombre_madre: bautismo.nombre_madre
+            }
+          : {
+              nombres: comunion.nombres,
+              apellidos: comunion.apellidos,
+              lugar_nacimiento: comunion.lugar_nacimiento,
+              fecha_nacimiento: comunion.fecha_nacimiento,
+              parroquia_bautismo: comunion.parroquia_bautismo,
+              fecha_bautismo: comunion.fecha_bautismo,
+              nombre_padre: comunion.nombre_padre,
+              nombre_madre: comunion.nombre_madre
+            };
+
+        this.zone.run(() => {
+          this.completarDatosPersonales(datos);
+          this.cdr.detectChanges();
+        });
+      }
+
+      // Los padrinos de Confirmación siempre se ingresan manualmente.
+      this.confirmacion.nombre_padrino = '';
+      this.confirmacion.nombre_madrina = '';
+
+      if (this.bautismoEncontrado || this.comunionEncontrada) {
+        let mensaje = 'Se encontraron antecedentes sacramentales.';
+
+        if (this.bautismoEncontrado && this.comunionEncontrada) {
+          mensaje = 'Se encontraron registros de Bautismo y Primera Comunión.';
+        } else if (this.bautismoEncontrado) {
+          mensaje = 'Se encontró un registro de Bautismo.';
+        } else {
+          mensaje = 'Se encontró un registro de Primera Comunión.';
+        }
+
+        await this.mostrarAlerta('Antecedentes encontrados', mensaje);
+      } else {
+        await this.mostrarAlerta(
+          'Sin antecedentes locales',
+          'No se encontraron registros locales de Bautismo ni de Primera Comunión para esta cédula. Esto no significa que la persona no haya recibido estos sacramentos. Puede continuar y completar los datos manualmente.'
+        );
+      }
+
+    } catch (error: any) {
       console.error('Error al buscar antecedentes:', error);
 
-      this.zone.run(() => {
-        this.buscandoAntecedentes = false;
-        this.bautismoEncontrado = false;
-        this.comunionEncontrada = false;
-        this.cdr.detectChanges();
-      });
+      this.bautismoEncontrado = false;
+      this.comunionEncontrada = false;
 
       await this.mostrarAlerta(
         'Error de consulta',
-        'Ocurrió un problema al consultar los registros sacramentales.'
+        error?.message || 'Ocurrió un problema al consultar los registros sacramentales.'
       );
+
+    } finally {
+      this.buscandoAntecedentes = false;
+      this.cdr.detectChanges();
     }
+  }
+
+  private completarDatosPersonales(datos: any): void {
+    this.confirmacion.nombres =
+      datos.nombres || this.confirmacion.nombres;
+
+    this.confirmacion.apellidos =
+      datos.apellidos || this.confirmacion.apellidos;
+
+    this.confirmacion.lugar_nacimiento =
+      datos.lugar_nacimiento || this.confirmacion.lugar_nacimiento;
+
+    this.confirmacion.fecha_nacimiento =
+      datos.fecha_nacimiento || this.confirmacion.fecha_nacimiento;
+
+    this.confirmacion.parroquia_bautismo =
+      datos.parroquia_bautismo || this.confirmacion.parroquia_bautismo;
+
+    this.confirmacion.fecha_bautismo =
+      datos.fecha_bautismo || this.confirmacion.fecha_bautismo;
+
+    this.confirmacion.nombre_padre =
+      datos.nombre_padre || this.confirmacion.nombre_padre;
+
+    this.confirmacion.nombre_madre =
+      datos.nombre_madre || this.confirmacion.nombre_madre;
   }
 
   // ==========================================
@@ -320,7 +428,8 @@ export class RegistroConfirmacionPage implements OnInit {
     const fechaNacimiento = new Date(c.fecha_nacimiento + 'T00:00:00');
 
     if (fechaNacimiento > fechaConfirmacion) {
-      this.mensajeError = 'La fecha de nacimiento no puede ser posterior a la Confirmación.';
+      this.mensajeError =
+        'La fecha de nacimiento no puede ser posterior a la Confirmación.';
       return false;
     }
 
@@ -328,12 +437,14 @@ export class RegistroConfirmacionPage implements OnInit {
       const fechaBautismo = new Date(c.fecha_bautismo + 'T00:00:00');
 
       if (fechaBautismo < fechaNacimiento) {
-        this.mensajeError = 'La fecha del Bautismo no puede ser anterior al nacimiento.';
+        this.mensajeError =
+          'La fecha del Bautismo no puede ser anterior al nacimiento.';
         return false;
       }
 
       if (fechaBautismo > fechaConfirmacion) {
-        this.mensajeError = 'La fecha del Bautismo no puede ser posterior a la Confirmación.';
+        this.mensajeError =
+          'La fecha del Bautismo no puede ser posterior a la Confirmación.';
         return false;
       }
     }
@@ -356,6 +467,10 @@ export class RegistroConfirmacionPage implements OnInit {
       return;
     }
 
+    this.guardando = true;
+    this.confirmacionGuardada = false;
+    this.confirmacionId = null;
+
     const c = this.confirmacion;
 
     const datos = {
@@ -363,68 +478,154 @@ export class RegistroConfirmacionPage implements OnInit {
       fecha_confirmacion: c.fecha_confirmacion,
       tomo_confirmacion: c.tomo_confirmacion.trim(),
       pagina_confirmacion: c.pagina_confirmacion.trim(),
-      lugar_confirmacion: c.lugar_confirmacion,
+      lugar_confirmacion: c.lugar_confirmacion.trim(),
       ministro: c.ministro.trim(),
-
       cedula: c.cedula.trim(),
       nombres: c.nombres.trim(),
       apellidos: c.apellidos.trim(),
       lugar_nacimiento: c.lugar_nacimiento.trim(),
       fecha_nacimiento: c.fecha_nacimiento,
-
       parroquia_bautismo: c.parroquia_bautismo.trim(),
       fecha_bautismo: c.fecha_bautismo || null,
-
       nombre_padre: c.nombre_padre.trim(),
       nombre_madre: c.nombre_madre.trim(),
-
       nombre_padrino: c.nombre_padrino.trim(),
       nombre_madrina: c.nombre_madrina.trim(),
-
-      // Copia histórica de la configuración parroquial vigente.
       parroco_nombre: this.parroco.nombre,
       pie_firma: this.parroco.pieFirma,
       parroco_firma_data: this.parroco.firmaData,
       parroco_firma_tipo: this.parroco.firmaTipo
     };
 
-    this.guardando = true;
-
     try {
-      const resultado = await (window as any).iglesia.confirmaciones.guardar(datos);
+      let idGuardado: number;
 
-      this.zone.run(async () => {
-        if (resultado && resultado.success) {
-          this.confirmacionId = resultado.id || resultado.insertId || null;
-          this.confirmacionGuardada = true;
+      if (this.esIOS()) {
+        const duplicado = await this.iglesiaSqlite.consultar(
+          `SELECT id FROM confirmaciones
+           WHERE numero_confirmacion = ?
+           LIMIT 1`,
+          [datos.numero_confirmacion]
+        );
 
-          await this.mostrarAlerta(
-            'Registro exitoso',
-            'La Confirmación se ha registrado correctamente.'
+        if (this.obtenerFilas(duplicado).length > 0) {
+          throw new Error(
+            'Ya existe una Confirmación registrada con ese número.'
           );
-        } else {
-          await this.mostrarAlerta(
-            'No se pudo guardar',
+        }
+
+        const resultado: any = await this.iglesiaSqlite.ejecutarCambios(
+          `INSERT INTO confirmaciones (
+            numero_confirmacion,
+            fecha_confirmacion,
+            tomo_confirmacion,
+            pagina_confirmacion,
+            lugar_confirmacion,
+            ministro,
+            cedula,
+            nombres,
+            apellidos,
+            lugar_nacimiento,
+            fecha_nacimiento,
+            parroquia_bautismo,
+            fecha_bautismo,
+            nombre_padre,
+            nombre_madre,
+            nombre_padrino,
+            nombre_madrina,
+            parroco_nombre,
+            pie_firma,
+            parroco_firma_data,
+            parroco_firma_tipo,
+            fecha_creacion,
+            fecha_actualizacion
+          ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+            datetime('now','localtime'),
+            datetime('now','localtime')
+          )`,
+          [
+            datos.numero_confirmacion,
+            datos.fecha_confirmacion,
+            datos.tomo_confirmacion,
+            datos.pagina_confirmacion,
+            datos.lugar_confirmacion,
+            datos.ministro,
+            datos.cedula,
+            datos.nombres,
+            datos.apellidos,
+            datos.lugar_nacimiento,
+            datos.fecha_nacimiento,
+            datos.parroquia_bautismo,
+            datos.fecha_bautismo,
+            datos.nombre_padre,
+            datos.nombre_madre,
+            datos.nombre_padrino,
+            datos.nombre_madrina,
+            datos.parroco_nombre,
+            datos.pie_firma,
+            datos.parroco_firma_data,
+            datos.parroco_firma_tipo
+          ]
+        );
+
+        idGuardado =
+          Number(resultado?.lastId || resultado?.lastInsertRowId) || 0;
+
+        if (!idGuardado) {
+          const ultima = await this.iglesiaSqlite.consultar(
+            'SELECT last_insert_rowid() AS id',
+            []
+          );
+
+          idGuardado = Number(this.obtenerFilas(ultima)[0]?.id) || 0;
+        }
+
+        if (!idGuardado) {
+          throw new Error('No se pudo recuperar el número del registro guardado.');
+        }
+
+      } else {
+        const api = (window as any).iglesia;
+
+        if (!api?.confirmaciones?.guardar) {
+          throw new Error('No está disponible la función para guardar Confirmaciones.');
+        }
+
+        const resultado = await api.confirmaciones.guardar(datos);
+
+        if (!resultado?.success) {
+          throw new Error(
             resultado?.message || 'No fue posible guardar el registro de Confirmación.'
           );
         }
 
-        this.guardando = false;
-        this.cdr.detectChanges();
-      });
-
-    } catch (error: any) {
-      console.error('Error al guardar Confirmación:', error);
+        idGuardado = Number(resultado.id || resultado.insertId);
+      }
 
       this.zone.run(() => {
-        this.guardando = false;
+        this.confirmacionId = idGuardado;
+        this.confirmacionGuardada = true;
+        this.mensajeError = '';
         this.cdr.detectChanges();
       });
 
       await this.mostrarAlerta(
-        'Error al guardar',
-        error?.message || 'Ocurrió un problema al guardar el registro.'
+        'Registro exitoso',
+        `La Confirmación se ha registrado correctamente.\nNúmero de registro: ${idGuardado}`
       );
+
+    } catch (error: any) {
+      console.error('Error al guardar Confirmación:', error);
+
+      this.mensajeError =
+        error?.message || 'Ocurrió un problema al guardar el registro.';
+
+      await this.mostrarAlerta('Error al guardar', this.mensajeError);
+
+    } finally {
+      this.guardando = false;
+      this.cdr.detectChanges();
     }
   }
 
@@ -435,7 +636,7 @@ export class RegistroConfirmacionPage implements OnInit {
   async mostrarAlerta(encabezado: string, mensaje: string): Promise<void> {
     const alerta = await this.alertController.create({
       header: encabezado,
-      message: mensaje,
+      message: mensaje.replace(/\n/g, '<br>'),
       buttons: ['Aceptar'],
       cssClass: 'alerta-iglesia'
     });
@@ -459,16 +660,13 @@ export class RegistroConfirmacionPage implements OnInit {
       pagina_confirmacion: '',
       lugar_confirmacion: '',
       ministro: '',
-
       cedula: '',
       nombres: '',
       apellidos: '',
       lugar_nacimiento: '',
       fecha_nacimiento: '',
-
       parroquia_bautismo: '',
       fecha_bautismo: '',
-
       nombre_padre: '',
       nombre_madre: '',
       nombre_padrino: '',
@@ -483,5 +681,4 @@ export class RegistroConfirmacionPage implements OnInit {
 
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }
-
 }
