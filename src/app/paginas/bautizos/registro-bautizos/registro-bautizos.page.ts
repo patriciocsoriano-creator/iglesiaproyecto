@@ -1,4 +1,3 @@
-
 import {
   Component,
   OnInit,
@@ -7,6 +6,9 @@ import {
 
 import { AlertController } from '@ionic/angular';
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
+
+import { IglesiaSqliteService } from '../../../servicios/iglesia-sqlite';
 
 @Component({
   selector: 'app-registro-bautizos',
@@ -15,45 +17,6 @@ import { Router } from '@angular/router';
   standalone: false,
 })
 export class RegistroBautizosPage implements OnInit {
-
-
-limpiarFormulario(): void {
-
-  this.bautizo = {
-    numero_bautizo: '',
-    fecha_bautizo: '',
-    tomo_bautizo: '',
-    pagina_bautizo: '',
-    lugar_bautizo: '',
-    ministro: '',
-
-    nombres_bautizado: '',
-    apellidos_bautizado: '',
-    lugar_nacimiento: '',
-    fecha_nacimiento: '',
-
-    nombre_padre: '',
-    nombre_madre: '',
-    padrino: '',
-    madrina: '',
-
-    cedula: '',
-    anio_registro: '',
-    tomo_registro: '',
-    pagina_registro: '',
-    acta_registro: '',
-    lugar_registro: '',
-
-    nota_marginal: 'Ninguna'
-  };
-
-  this.bautizoGuardado = false;
-  this.bautizoId = null;
-  this.mensajeError = '';
-
-  this.changeDetector.detectChanges();
-}
-
 
   cargandoParroco = true;
   guardando = false;
@@ -76,71 +39,85 @@ limpiarFormulario(): void {
     firmaPreview: ''
   };
 
-  bautizo = {
-    numero_bautizo: '',
-    fecha_bautizo: '',
-    tomo_bautizo: '',
-    pagina_bautizo: '',
-    lugar_bautizo: '',
-    ministro: '',
-
-    nombres_bautizado: '',
-    apellidos_bautizado: '',
-    lugar_nacimiento: '',
-    fecha_nacimiento: '',
-
-    nombre_padre: '',
-    nombre_madre: '',
-    padrino: '',
-    madrina: '',
-
-    cedula: '',
-    anio_registro: '',
-    tomo_registro: '',
-    pagina_registro: '',
-    acta_registro: '',
-    lugar_registro: '',
-
-    nota_marginal: 'Ninguna'
-  };
+  bautizo = this.nuevoBautizo();
 
   constructor(
     private alertController: AlertController,
     private router: Router,
-    private changeDetector: ChangeDetectorRef
+    private changeDetector: ChangeDetectorRef,
+    private iglesiaSqlite: IglesiaSqliteService
   ) {}
 
-  // =====================================================
-  // INICIALIZACIÓN
-  // =====================================================
+  private nuevoBautizo() {
+    return {
+      numero_bautizo: '',
+      fecha_bautizo: '',
+      tomo_bautizo: '',
+      pagina_bautizo: '',
+      lugar_bautizo: '',
+      ministro: '',
+      nombres_bautizado: '',
+      apellidos_bautizado: '',
+      lugar_nacimiento: '',
+      fecha_nacimiento: '',
+      nombre_padre: '',
+      nombre_madre: '',
+      padrino: '',
+      madrina: '',
+      cedula: '',
+      anio_registro: '',
+      tomo_registro: '',
+      pagina_registro: '',
+      acta_registro: '',
+      lugar_registro: '',
+      nota_marginal: 'Ninguna'
+    };
+  }
 
   async ngOnInit(): Promise<void> {
     await this.cargarParrocoVigente();
   }
 
   // =====================================================
-  // OBTENER PÁRROCO DESDE MANTENIMIENTO
+  // CARGAR CONFIGURACIÓN PARROQUIAL
   // =====================================================
 
   async cargarParrocoVigente(): Promise<void> {
 
     this.cargandoParroco = true;
+    this.mensajeError = '';
 
     try {
 
-      const api = (window as any).iglesia;
+      let datos: any;
 
-      if (!api?.parroco?.obtener) {
-        throw new Error(
-          'No está disponible la conexión con la configuración parroquial.'
+      if (Capacitor.isNativePlatform()) {
+
+        const registros = await this.iglesiaSqlite.consultar(
+          `SELECT *
+           FROM configuracion_parroquial
+           WHERE id = 1
+           LIMIT 1`
         );
-      }
 
-      const datos = await api.parroco.obtener();
+        datos = registros[0];
+
+      } else {
+
+        const api = (window as any).iglesia;
+
+        if (!api?.parroco?.obtener) {
+          throw new Error(
+            'No está disponible la conexión con la configuración parroquial.'
+          );
+        }
+
+        datos = await api.parroco.obtener();
+      }
 
       if (!datos) {
         throw new Error(
-          'No se encontró la configuración del párroco.'
+          'No se encontró la configuración parroquial.'
         );
       }
 
@@ -169,7 +146,7 @@ limpiarFormulario(): void {
     } catch (error: any) {
 
       console.error(
-        'Error al cargar párroco vigente:',
+        'Error al cargar configuración parroquial:',
         error
       );
 
@@ -230,7 +207,7 @@ limpiarFormulario(): void {
   }
 
   // =====================================================
-  // GUARDAR BAUTIZO EN SQLITE
+  // GUARDAR BAUTIZO
   // =====================================================
 
   async guardarBautizo(): Promise<void> {
@@ -256,15 +233,8 @@ limpiarFormulario(): void {
 
     try {
 
-      const api = (window as any).iglesia;
+      const datos: any = {
 
-      if (!api?.bautizos?.guardar) {
-        throw new Error(
-          'No está disponible la conexión para guardar bautizos.'
-        );
-      }
-
-      const datos = {
         numero_bautizo: this.bautizo.numero_bautizo.trim(),
         fecha_bautizo: this.bautizo.fecha_bautizo,
         tomo_bautizo: this.bautizo.tomo_bautizo.trim(),
@@ -290,27 +260,131 @@ limpiarFormulario(): void {
         lugar_registro: this.bautizo.lugar_registro.trim(),
 
         nota_marginal:
-          this.bautizo.nota_marginal.trim() || 'Ninguna'
+          this.bautizo.nota_marginal.trim() || 'Ninguna',
+
+        parroco_nombre: this.parroco.nombre,
+        pie_firma: this.parroco.pieFirma
       };
 
-      const resultado = await api.bautizos.guardar(datos);
+      let resultado: any;
 
-      if (!resultado?.success) {
-        throw new Error(
-          resultado?.message || 'No se pudo registrar el bautizo.'
+      if (Capacitor.isNativePlatform()) {
+
+        // Comprobar que el número no esté registrado.
+        const existente = await this.iglesiaSqlite.consultar(
+          `SELECT id
+           FROM bautizos
+           WHERE numero_bautizo = ?
+           LIMIT 1`,
+          [datos.numero_bautizo]
         );
+
+        if (existente.length > 0) {
+          throw new Error(
+            'Ya existe un bautizo registrado con ese número.'
+          );
+        }
+
+        const sql = `
+          INSERT INTO bautizos (
+            numero_bautizo,
+            fecha_bautizo,
+            tomo_bautizo,
+            pagina_bautizo,
+            lugar_bautizo,
+            ministro,
+            nombres_bautizado,
+            apellidos_bautizado,
+            lugar_nacimiento,
+            fecha_nacimiento,
+            nombre_padre,
+            nombre_madre,
+            padrino,
+            madrina,
+            cedula,
+            anio_registro,
+            tomo_registro,
+            pagina_registro,
+            acta_registro,
+            lugar_registro,
+            nota_marginal,
+            parroco_nombre,
+            pie_firma
+          ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+          )
+        `;
+
+        const valores = [
+          datos.numero_bautizo,
+          datos.fecha_bautizo,
+          datos.tomo_bautizo,
+          datos.pagina_bautizo,
+          datos.lugar_bautizo,
+          datos.ministro,
+          datos.nombres_bautizado,
+          datos.apellidos_bautizado,
+          datos.lugar_nacimiento,
+          datos.fecha_nacimiento,
+          datos.nombre_padre,
+          datos.nombre_madre,
+          datos.padrino,
+          datos.madrina,
+          datos.cedula,
+          datos.anio_registro,
+          datos.tomo_registro,
+          datos.pagina_registro,
+          datos.acta_registro,
+          datos.lugar_registro,
+          datos.nota_marginal,
+          datos.parroco_nombre,
+          datos.pie_firma
+        ];
+
+        resultado = await this.iglesiaSqlite.ejecutarCambios(
+          sql,
+          valores
+        );
+
+        this.bautizoId =
+          resultado?.changes?.lastId ??
+          resultado?.lastId ??
+          null;
+
+      } else {
+
+        const api = (window as any).iglesia;
+
+        if (!api?.bautizos?.guardar) {
+          throw new Error(
+            'No está disponible la conexión para guardar bautizos.'
+          );
+        }
+
+        resultado = await api.bautizos.guardar(datos);
+
+        if (!resultado?.success) {
+          throw new Error(
+            resultado?.message ||
+            'No se pudo registrar el bautizo.'
+          );
+        }
+
+        this.bautizoId = Number(resultado.id);
       }
 
-      this.bautizoId = Number(resultado.id);
       this.bautizoGuardado = true;
 
       await this.mostrarAlerta(
         'Bautizo registrado',
-        `El registro se guardó correctamente en la base de datos. Número de registro: ${resultado.id}.`
+        'El registro se guardó correctamente en la base de datos. ' +
+        (this.bautizoId
+          ? `Número de registro: ${this.bautizoId}.`
+          : '')
       );
 
-      // Limpiar los campos después de confirmar el guardado.
-this.limpiarFormulario();
+      this.limpiarFormulario();
 
     } catch (error: any) {
 
@@ -331,6 +405,21 @@ this.limpiarFormulario();
       this.changeDetector.detectChanges();
 
     }
+  }
+
+  // =====================================================
+  // LIMPIAR FORMULARIO
+  // =====================================================
+
+  limpiarFormulario(): void {
+
+    this.bautizo = this.nuevoBautizo();
+
+    this.bautizoGuardado = false;
+    this.bautizoId = null;
+    this.mensajeError = '';
+
+    this.changeDetector.detectChanges();
   }
 
   // =====================================================
@@ -359,15 +448,16 @@ this.limpiarFormulario();
     this.router.navigateByUrl('/bautizos');
   }
 
+  cambiarLugarBautizo(event: any): void {
 
-cambiarLugarBautizo(event: any): void {
-  this.bautizo.lugar_bautizo = event.detail.value || '';
-  this.changeDetector.detectChanges();
+    this.bautizo.lugar_bautizo =
+      event.detail.value || '';
 
-  console.log(
-    'Lugar del bautizo seleccionado:',
-    this.bautizo.lugar_bautizo
-  );
-}
+    this.changeDetector.detectChanges();
 
+    console.log(
+      'Lugar del bautizo seleccionado:',
+      this.bautizo.lugar_bautizo
+    );
+  }
 }
