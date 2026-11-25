@@ -796,12 +796,19 @@ async autenticarUsuario(
 
   const registro = registros[0];
 
-  if (!registro || Number(registro.activo) !== 1) {
-    return {
-      success: false,
-      message: 'Usuario o contraseña incorrectos.'
-    };
-  }
+  if (!registro) {
+  return {
+    success: false,
+    message: `El usuario "${usuario.trim()}" no existe en la base de datos del iPhone.`
+  };
+}
+
+if (Number(registro.activo) !== 1) {
+  return {
+    success: false,
+    message: 'El usuario existe, pero está desactivado.'
+  };
+}
 
   try {
     const passwordBytes = new TextEncoder().encode(contrasena);
@@ -823,11 +830,19 @@ async autenticarUsuario(
     const hashGuardado = String(registro.password_hash).toLowerCase();
 
     if (!this.compararHashes(hashGuardado, hashIngresado)) {
-      return {
-        success: false,
-        message: 'Usuario o contraseña incorrectos.'
-      };
-    }
+  console.log('Diagnóstico de autenticación:', {
+    usuarioEncontrado: true,
+    activo: registro.activo,
+    longitudHashGuardado: hashGuardado.length,
+    longitudHashCalculado: hashIngresado.length,
+    longitudSalt: registro.salt.length
+  });
+
+  return {
+    success: false,
+    message: 'El usuario existe, pero la contraseña no coincide con el registro importado.'
+  };
+}
 
     return {
       success: true,
