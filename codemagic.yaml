@@ -35,13 +35,36 @@ workflows:
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
 
-      - name: Comprimir aplicacion
+      - name: Crear IPA para Sideloadly
         script: |
+          APP_PATH="$CM_BUILD_DIR/build/ios/device/Build/Products/Release-iphoneos/App.app"
+
+          rm -rf "$CM_BUILD_DIR/Payload"
+          rm -f "$CM_BUILD_DIR/Iglesia.ipa"
+
+          mkdir -p "$CM_BUILD_DIR/Payload"
+
+          if [ ! -d "$APP_PATH" ]; then
+            echo "ERROR: No se encontro App.app"
+            exit 1
+          fi
+
+          ditto "$APP_PATH" "$CM_BUILD_DIR/Payload/App.app"
+
           ditto -c -k --sequesterRsrc --keepParent \
-            "$CM_BUILD_DIR/build/ios/device/Build/Products/Release-iphoneos/App.app" \
-            "$CM_BUILD_DIR/App-iphone-unsigned.zip"
+            "$CM_BUILD_DIR/Payload" \
+            "$CM_BUILD_DIR/Iglesia.ipa"
+
+          if [ ! -f "$CM_BUILD_DIR/Iglesia.ipa" ]; then
+            echo "ERROR: No se genero Iglesia.ipa"
+            exit 1
+          fi
+
+          unzip -l "$CM_BUILD_DIR/Iglesia.ipa"
+
+          echo "IPA generado correctamente"
 
     artifacts:
+      - Iglesia.ipa
       - build/ios/device/Build/Products/Release-iphoneos/*.app
-      - App-iphone-unsigned.zip
       - /tmp/xcodebuild_logs/*.log
