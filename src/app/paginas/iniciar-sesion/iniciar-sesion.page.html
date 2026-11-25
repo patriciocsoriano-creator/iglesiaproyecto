@@ -1,15 +1,15 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>iniciar-sesion</ion-title>
+    <ion-title>IGLESIA</ion-title>
   </ion-toolbar>
 </ion-header>
-
 
 <ion-content [fullscreen]="true" class="login-content">
 
   <div class="login-container">
 
-    <!-- Panel izquierdo: identidad del sistema -->
+    <!-- PANEL DE IDENTIDAD -->
+
     <section class="brand-panel">
 
       <div class="brand-content">
@@ -19,6 +19,7 @@
         </div>
 
         <h1>IGLESIA</h1>
+
         <h2>Sistema de Administración Parroquial</h2>
 
         <div class="brand-divider"></div>
@@ -36,24 +37,32 @@
 
     </section>
 
-    <!-- Panel derecho: formulario -->
+    <!-- PANEL DE INICIO DE SESIÓN -->
+
     <section class="form-panel">
 
       <div class="login-card">
 
         <div class="welcome-text">
           <span class="subtitle">BIENVENIDO</span>
+
           <h2>Iniciar sesión</h2>
-          <p>Ingresa tus credenciales para acceder al sistema.</p>
+
+          <p>
+            Ingresa tus credenciales para acceder al sistema.
+          </p>
         </div>
 
         <form (ngSubmit)="iniciarSesion()">
 
-          <!-- Usuario -->
+          <!-- USUARIO -->
+
           <div class="form-field">
+
             <ion-label>Usuario</ion-label>
 
             <ion-item class="input-item" lines="none">
+
               <ion-icon
                 name="person-outline"
                 slot="start">
@@ -66,14 +75,19 @@
                 [(ngModel)]="usuario"
                 autocomplete="username">
               </ion-input>
+
             </ion-item>
+
           </div>
 
-          <!-- Contraseña -->
+          <!-- CONTRASEÑA -->
+
           <div class="form-field">
+
             <ion-label>Contraseña</ion-label>
 
             <ion-item class="input-item" lines="none">
+
               <ion-icon
                 name="lock-closed-outline"
                 slot="start">
@@ -101,43 +115,121 @@
               </ion-button>
 
             </ion-item>
+
           </div>
 
-          <!-- Mensaje de validación -->
+          <!-- MENSAJE DE ERROR -->
+
           <div class="error-message" *ngIf="mensaje">
+
             <ion-icon name="alert-circle-outline"></ion-icon>
+
             {{ mensaje }}
+
           </div>
 
-          <!-- Botón -->
-          
-<ion-button
-  expand="block"
-  type="submit"
-  class="login-button"
-  [disabled]="cargando">
+          <!-- MENSAJE DE ÉXITO -->
 
-  <ion-spinner
-    *ngIf="cargando"
-    name="crescent">
-  </ion-spinner>
+          <div
+            *ngIf="mensajeExito"
+            style="color: #16834a; margin: 12px 0; font-size: 14px;">
 
-  <span *ngIf="!cargando">Ingresar al sistema</span>
+            <ion-icon name="checkmark-circle-outline"></ion-icon>
 
-  <ion-icon
-    *ngIf="!cargando"
-    name="arrow-forward-outline"
-    slot="end">
-  </ion-icon>
+            {{ mensajeExito }}
 
-</ion-button>
+          </div>
 
+          <!-- BOTÓN INGRESAR -->
+
+          <ion-button
+            expand="block"
+            type="submit"
+            class="login-button"
+            [disabled]="cargando || importando">
+
+            <ion-spinner
+              *ngIf="cargando"
+              name="crescent">
+            </ion-spinner>
+
+            <span *ngIf="!cargando">
+              Ingresar al sistema
+            </span>
+
+            <ion-icon
+              *ngIf="!cargando"
+              name="arrow-forward-outline"
+              slot="end">
+            </ion-icon>
+
+          </ion-button>
 
         </form>
 
+        <!-- IMPORTAR RESPALDO: SOLO IOS / ANDROID -->
+
+        <div
+          *ngIf="iglesiaEsMovil"
+          style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e5e5e5;">
+
+          <div style="text-align: center; margin-bottom: 12px;">
+
+            <ion-icon
+              name="cloud-download-outline"
+              style="font-size: 30px; color: var(--ion-color-primary);">
+            </ion-icon>
+
+            <h3 style="font-size: 16px; margin: 8px 0;">
+              Transferir información
+            </h3>
+
+            <p style="font-size: 13px; color: #777;">
+              Si es la primera vez que utilizas la aplicación,
+              importa el respaldo generado desde Windows.
+            </p>
+
+          </div>
+
+          <input
+            #archivoRespaldo
+            type="file"
+            accept=".json,application/json"
+            hidden
+            (change)="importarRespaldo($event)">
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            type="button"
+            [disabled]="importando || cargando"
+            (click)="archivoRespaldo.click()">
+
+            <ion-spinner
+              *ngIf="importando"
+              name="crescent">
+            </ion-spinner>
+
+            <ion-icon
+              *ngIf="!importando"
+              name="document-attach-outline"
+              slot="start">
+            </ion-icon>
+
+            {{ importando ? 'Importando respaldo...' : 'Seleccionar respaldo JSON' }}
+
+          </ion-button>
+
+        </div>
+
+        <!-- SEGURIDAD -->
+
         <div class="security-info">
+
           <ion-icon name="shield-checkmark-outline"></ion-icon>
+
           <span>Acceso privado y protegido</span>
+
         </div>
 
       </div>
@@ -151,4 +243,3 @@
   </div>
 
 </ion-content>
-

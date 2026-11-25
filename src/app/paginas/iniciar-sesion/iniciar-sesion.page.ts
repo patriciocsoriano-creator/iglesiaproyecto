@@ -16,9 +16,16 @@ export class IniciarSesionPage implements OnInit {
 
   contrasenaVisible: boolean = false;
   mensaje: string = '';
+  mensajeExito: string = '';
+
   cargando: boolean = false;
+  importando: boolean = false;
 
   anioActual: number = new Date().getFullYear();
+
+  get iglesiaEsMovil(): boolean {
+  return Capacitor.isNativePlatform();
+}
 
   constructor(
     private router: Router,
@@ -31,9 +38,14 @@ export class IniciarSesionPage implements OnInit {
     this.contrasenaVisible = !this.contrasenaVisible;
   }
 
+  // =====================================================
+  // INICIAR SESIÓN
+  // =====================================================
+
   async iniciarSesion() {
 
     this.mensaje = '';
+    this.mensajeExito = '';
 
     if (!this.usuario.trim()) {
       this.mensaje = 'Por favor, ingresa tu usuario.';
@@ -53,8 +65,6 @@ export class IniciarSesionPage implements OnInit {
 
       if (Capacitor.isNativePlatform()) {
 
-        // AUTENTICACIÓN EN ANDROID / IOS
-
         respuesta = await this.iglesiaSqlite.autenticarUsuario(
           this.usuario.trim(),
           this.contrasena
@@ -62,10 +72,10 @@ export class IniciarSesionPage implements OnInit {
 
       } else {
 
-        // AUTENTICACIÓN EN WINDOWS CON ELECTRON
-
         if (!window.iglesia?.auth?.login) {
-          throw new Error('El servicio de autenticación de Windows no está disponible.');
+          throw new Error(
+            'El servicio de autenticación de Windows no está disponible.'
+          );
         }
 
         respuesta = await window.iglesia.auth.login({
@@ -92,7 +102,7 @@ export class IniciarSesionPage implements OnInit {
       console.error('Error de autenticación:', error);
 
       this.mensaje = Capacitor.isNativePlatform()
-        ? 'No se pudo acceder a la base de datos del dispositivo. Comprueba que hayas importado el respaldo.'
+        ? 'No se pudo acceder a la base de datos del dispositivo.'
         : 'No se pudo conectar con la base de datos local.';
 
     } finally {
@@ -101,4 +111,67 @@ export class IniciarSesionPage implements OnInit {
 
     }
   }
+
+  // =====================================================
+  // IMPORTAR RESPALDO DESDE EL INICIO DE SESIÓN
+  // =====================================================
+
+  async importarRespaldo(event: Event) {
+
+    this.mensaje = '';
+    this.mensajeExito = '';
+
+    const elemento = event.target as HTMLInputElement;
+    const archivo = elemento.files?.[0];
+
+    if (!archivo) {
+      return;
+    }
+
+    if (!Capacitor.isNativePlatform()) {
+      this.mensaje = 'Esta opción está disponible en dispositivos móviles.';
+      elemento.value = '';
+      return;
+    }
+
+    if (!archivo.name.toLowerCase().endsWith('.json')) {
+      this.mensaje = 'Selecciona un archivo de respaldo con extensión .json.';
+      elemento.value = '';
+      return;
+    }
+
+    this.importando = true;
+
+    try {
+
+      const resultado = await this.iglesiaSqlite.importarArchivo(archivo);
+
+      if (!resultado || !resultado.success) {
+        throw new Error(
+          resultado?.message || 'No se pudo importar el respaldo.'
+        );
+      }
+
+      this.usuario = 'admin';
+
+      this.mensajeExito =
+        'Respaldo importado correctamente. Ya puedes iniciar sesión con tus credenciales de Windows.';
+
+      console.log('Respaldo importado:', resultado);
+
+    } catch (error: any) {
+
+      console.error('Error al importar respaldo:', error);
+
+      this.mensaje = error?.message ||
+        'No se pudo importar el respaldo.';
+
+    } finally {
+
+      this.importando = false;
+      elemento.value = '';
+
+    }
+  }
+
 }
