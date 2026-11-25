@@ -7,6 +7,8 @@ import {
   SQLiteDBConnection
 } from '@capacitor-community/sqlite';
 
+import { scrypt } from 'scrypt-js';
+
 @Injectable({
   providedIn: 'root'
 })
@@ -739,6 +741,114 @@ async importarRespaldo(contenido: string): Promise<any> {
 
   }
 
+}
+
+// =====================================================
+// AUTENTICACIÓN COMPATIBLE CON WINDOWS
+// =====================================================
+
+private hexABytes(hex: string): Uint8Array {
+  const resultado = new Uint8Array(hex.length / 2);
+
+  for (let i = 0; i < hex.length; i += 2) {
+    resultado[i / 2] = parseInt(hex.substring(i, i + 2), 16);
+  }
+
+  return resultado;
+}
+
+private bytesAHex(bytes: Uint8Array): string {
+  return Array.from(bytes)
+    .map(byte => byte.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+private compararHashes(a: string, b: string): boolean {
+  if (a.length !== b.length) {
+    return false;
+  }
+
+  let diferencia = 0;
+
+  for (let i = 0; i < a.length; i++) {
+    diferencia |= a.charCodeAt(i) ^ b.charCodeAt(i);
+  }
+
+  return diferencia === 0;
+}
+
+async autenticarUsuario(
+  usuario: string,
+  contrasena: string
+): Promise<any> {
+
+  await this.inicializar();
+
+  const registros = await this.consultar(
+    `SELECT
+      id,
+      usuario,
+      nombre_completo,
+      password_hash,
+      salt,
+      rol,
+      activo
+    FROM usuarios
+    WHERE usuario = ? COLLATE NOCASE
+    LIMIT 1`,
+    [usuario.trim()]
+  );
+
+  const registro = registros[0];
+
+  if (!registro || Number(registro.activo) !== 1) {
+    return {
+      success: false,
+      message: 'Usuario o contraseña incorrectos.'
+    };
+  }
+
+  try {
+    const passwordBytes = new TextEncoder().encode(contrasena);
+    const saltBytes = this.hexABytes(registro.salt);
+
+    // Los mismos parámetros utilizados por Node.js:
+    // crypto.scryptSync(password, salt, 64)
+
+    const hashCalculado = await scrypt(
+      passwordBytes,
+      saltBytes,
+      16384,
+      8,
+      1,
+      64
+    );
+
+    const hashIngresado = this.bytesAHex(hashCalculado);
+    const hashGuardado = String(registro.password_hash).toLowerCase();
+
+    if (!this.compararHashes(hashGuardado, hashIngresado)) {
+      return {
+        success: false,
+        message: 'Usuario o contraseña incorrectos.'
+      };
+    }
+
+    return {
+      success: true,
+      user: {
+        id: registro.id,
+        usuario: registro.usuario,
+        nombre: registro.nombre_completo,
+        rol: registro.rol
+      }
+    };
+
+  } catch (error) {
+    console.error('Error al verificar contraseña:', error);
+
+    throw new Error('No fue posible verificar las credenciales.');
+  }
 }
 
 

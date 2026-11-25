@@ -1,6 +1,8 @@
 
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
+import { Capacitor } from '@capacitor/core';
+import { IglesiaSqliteService } from '../../servicios/iglesia-sqlite';
 
 @Component({
   selector: 'app-iniciar-sesion',
@@ -20,10 +22,11 @@ export class IniciarSesionPage implements OnInit {
   anioActual: number = new Date().getFullYear();
 
   constructor(
-    private router: Router
-  ) { }
+    private router: Router,
+    private iglesiaSqlite: IglesiaSqliteService
+  ) {}
 
-  ngOnInit() { }
+  ngOnInit() {}
 
   alternarContrasena() {
     this.contrasenaVisible = !this.contrasenaVisible;
@@ -47,21 +50,40 @@ export class IniciarSesionPage implements OnInit {
 
     try {
 
-      const respuesta = await window.iglesia.auth.login({
-        usuario: this.usuario.trim(),
-        contrasena: this.contrasena
-      });
+      let respuesta: any;
 
-      console.log('Respuesta del servidor local:', respuesta);
+      if (Capacitor.isNativePlatform()) {
+
+        // AUTENTICACIÓN EN ANDROID / IOS
+
+        respuesta = await this.iglesiaSqlite.autenticarUsuario(
+          this.usuario.trim(),
+          this.contrasena
+        );
+
+      } else {
+
+        // AUTENTICACIÓN EN WINDOWS CON ELECTRON
+
+        if (!window.iglesia?.auth?.login) {
+          throw new Error('El servicio de autenticación de Windows no está disponible.');
+        }
+
+        respuesta = await window.iglesia.auth.login({
+          usuario: this.usuario.trim(),
+          contrasena: this.contrasena
+        });
+
+      }
 
       if (!respuesta || !respuesta.success) {
-        this.mensaje = respuesta?.message || 'Usuario o contraseña incorrectos.';
+        this.mensaje =
+          respuesta?.message || 'Usuario o contraseña incorrectos.';
         return;
       }
 
       console.log('Usuario autenticado:', respuesta.user);
 
-      // Acceso correcto: navegar al módulo principal.
       await this.router.navigateByUrl('/principal', {
         replaceUrl: true
       });
@@ -70,14 +92,14 @@ export class IniciarSesionPage implements OnInit {
 
       console.error('Error de autenticación:', error);
 
-      this.mensaje = 'No se pudo conectar con la base de datos local.';
+      this.mensaje = Capacitor.isNativePlatform()
+        ? 'No se pudo acceder a la base de datos del dispositivo. Comprueba que hayas importado el respaldo.'
+        : 'No se pudo conectar con la base de datos local.';
 
     } finally {
 
       this.cargando = false;
 
     }
-
   }
-
 }
