@@ -5,7 +5,7 @@
   </ion-toolbar>
 </ion-header>
 
-<ion-content [fullscreen]="true" class="mantenimiento-content">
+<ion-content [fullscreen]="true" class="mantenimiento-content" scroll-y="true">
 
   <div class="contenedor-principal">
 
@@ -394,7 +394,7 @@
 
       <ion-button
         expand="block"
-        class="boton-guardar"
+        class="boton-guardar boton-sticky"
         [disabled]="cargando || guardando"
         (click)="guardarConfiguracion()">
 
